@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pointer Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FFFDF7;
+  --paper: #FFF9EC;
+  --beige: #FFF1D6;
+  --terracotta: #FF8A65;
+  --terracotta-dark: #F4511E;
+  --terracotta-ink: #B0350B;
+  --mint: #4DD0A7;
+  --mint-dark: #16A87D;
+  --mint-ink: #0B6E52;
+  --sun: #FFC93C;
+  --sun-dark: #F2A900;
+  --sky: #4FB0E5;
+  --slate: #3D405B;
+  --slate-soft: #8B8AA8;
+  --line: #FFD98A;
+  --card-shadow: 3px 5px 0 rgba(61,64,91,0.10);
+  --card-shadow-hover: 4px 7px 0 rgba(61,64,91,0.14);
+  --radius: 20px;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--cream);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(244,81,30,0.12) 1.5px, transparent 0);
+  background-size: 20px 20px;
+  color: var(--slate);
+  font-family: 'Fredoka', sans-serif;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+
+h1, h2, h3 { font-family: 'Fredoka', sans-serif; font-weight: 600; margin: 0; }
+code, .mono { font-family: 'Fira Code', monospace; }
+
+.wrap { max-width: 1040px; margin: 0 auto; padding: 26px 20px 44px; }
+
+header.top { margin-bottom: 20px; text-align: center; }
+header.top h1 {
+  font-family: 'Caveat', cursive; font-weight: 700; font-size: 44px;
+  color: var(--terracotta-dark); transform: rotate(-1.5deg); display: inline-block;
+  text-shadow: 2px 2px 0 var(--sun);
+}
+header.top .sub { font-size: 13.5px; color: var(--slate-soft); margin-top: 4px; }
+
+/* --- Toolbar strip --- */
+.toolbar-panel {
+  background: var(--beige);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  border: 3px solid var(--line);
+}
+.toolbar-label {
+  font-family: 'Caveat', cursive; font-weight: 700; font-size: 20px;
+  color: var(--terracotta-dark); margin-right: 4px; white-space: nowrap;
+}
+button {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 500;
+  font-size: 13.5px;
+  border: 2.5px solid var(--slate);
+  border-radius: 13px;
+  padding: 9px 13px;
+  cursor: pointer;
+  background: #fff;
+  color: var(--slate);
+  box-shadow: 2px 3px 0 var(--slate);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+button:hover { transform: translate(-1px,-1px); box-shadow: 3px 4px 0 var(--slate); }
+button:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--slate); }
+button.primary { background: var(--terracotta); color: #fff; border-color: var(--terracotta-ink); box-shadow: 2px 3px 0 var(--terracotta-ink); }
+button.primary:hover { background: #FF7043; box-shadow: 3px 4px 0 var(--terracotta-ink); }
+button.mint { background: var(--mint); color: #fff; border-color: var(--mint-ink); box-shadow: 2px 3px 0 var(--mint-ink); }
+button.mint:hover { background: #3FC79A; box-shadow: 3px 4px 0 var(--mint-ink); }
+button.sun { background: var(--sun); color: var(--terracotta-ink); border-color: var(--sun-dark); box-shadow: 2px 3px 0 var(--sun-dark); }
+button.sun:hover { background: #FFD65C; box-shadow: 3px 4px 0 var(--sun-dark); }
+button.ghost { background: #fff; }
+button:disabled { opacity: 0.4; cursor: default; transform: none !important; }
+
+/* --- Canvas --- */
+.canvas-panel {
+  position: relative;
+  min-height: 440px;
+  padding: 22px 22px 30px;
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 3px solid var(--line);
+  overflow: hidden;
+}
+.zone-label {
+  font-family: 'Caveat', cursive; font-weight: 700; font-size: 22px;
+  color: var(--mint-ink); margin-bottom: 6px; display: inline-block;
+  position: relative; z-index: 2;
+}
+.zone-label.ptr-label { color: var(--terracotta-ink); }
+.zone { position: relative; min-height: 160px; margin-bottom: 4px; }
+.zone-divider {
+  border: none; border-top: 3px dashed var(--sun-dark); margin: 18px 0;
+  position: relative; opacity: 0.55;
+}
+.zone-divider::after {
+  content: "\2702"; position: absolute; left: 50%; top: -12px;
+  transform: translateX(-50%) rotate(8deg); font-size: 16px; color: var(--sun-dark);
+  background: var(--paper); padding: 0 8px;
+}
+
+svg.arrows { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+
+.cards-row { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: 16px; min-height: 96px; align-items: flex-start; }
+
+.mem-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 11px 15px;
+  min-width: 122px;
+  box-shadow: var(--card-shadow);
+  animation: floaty 5s ease-in-out infinite;
+  border: 3px solid transparent;
+  position: relative;
+}
+.mem-card.var-card { border-color: var(--mint); background: #F1FDF8; }
+.mem-card.pointer-card { border-color: var(--terracotta); background: #FFF3EC; }
+.mem-card.glow { box-shadow: 0 0 0 5px rgba(255,138,101,0.35), var(--card-shadow-hover); }
+.mem-card.pulse { animation: floaty 5s ease-in-out infinite, pop 0.5s ease; }
+.mem-card .name { font-weight: 700; font-size: 17px; color: var(--slate); }
+.mem-card .type { font-size: 11px; color: var(--slate-soft); font-family: 'Fira Code', monospace; }
+.mem-card .addr { font-size: 11px; color: var(--mint-ink); margin-top: 5px; font-family: 'Fira Code', monospace; font-weight: 500; }
+.mem-card .val { font-size: 14px; margin-top: 3px; }
+.mem-card .val b { font-family: 'Fira Code', monospace; color: var(--sun-dark); }
+.mem-card .target { font-size: 11px; color: var(--terracotta-ink); margin-top: 2px; font-family: 'Fira Code', monospace; font-weight: 500; }
+.mem-card .del-btn {
+  position: absolute; top: -9px; right: -9px; width: 21px; height: 21px;
+  border-radius: 50%; border: 2px solid var(--slate); background: var(--sun);
+  color: var(--slate); font-size: 11px; line-height: 1; padding: 0;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  box-shadow: 1px 2px 0 var(--slate); opacity: 0; transition: opacity 0.15s ease;
+}
+.mem-card:hover .del-btn { opacity: 1; }
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(-0.6deg); }
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.deref-bubble {
+  position: absolute;
+  background: var(--slate);
+  color: var(--cream);
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  z-index: 5;
+  pointer-events: none;
+  animation: bubble-in 0.4s ease;
+  white-space: nowrap;
+}
+@keyframes bubble-in {
+  0% { opacity: 0; transform: translateY(6px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.empty-hint {
+  color: var(--slate-soft); padding: 22px 8px;
+  font-family: 'Caveat', cursive; font-size: 19px;
+}
+
+.toast {
+  position: absolute;
+  bottom: 16px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--sun);
+  color: var(--terracotta-ink);
+  padding: 10px 16px;
+  border-radius: 13px;
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: var(--card-shadow);
+  border: 2.5px solid var(--sun-dark);
+  opacity: 0;
+  z-index: 10;
+  transition: all 0.25s ease;
+  max-width: 90%;
+  text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(61,64,91,0.42);
+  display: none; align-items: center; justify-content: center; z-index: 50;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 22px;
+  width: 280px;
+  box-shadow: 5px 7px 0 var(--slate);
+  border: 3px solid var(--slate);
+}
+.modal h3 { font-family: 'Caveat', cursive; font-weight: 700; font-size: 26px; margin-bottom: 12px; color: var(--terracotta-dark); }
+.modal label { font-size: 12px; color: var(--slate-soft); display: block; margin: 10px 0 4px; }
+.modal input, .modal select {
+  width: 100%; padding: 9px 11px; border-radius: 12px;
+  border: 2.5px solid var(--line); font-family: 'Fira Code', monospace; font-size: 13px;
+  background: var(--paper); color: var(--slate);
+}
+.modal input:focus, .modal select:focus { outline: none; border-color: var(--sky); }
+.modal-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+.err-text { color: var(--terracotta-dark); font-size: 11.5px; margin-top: 4px; min-height: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Pointer Playground</h1>
+  </header>
+
+  <div class="toolbar-panel">
+    <span class="toolbar-label">make:</span>
+    <button id="addVarBtn"><i>&#9679;</i> variable</button>
+    <button id="addPtrBtn"><i>&#8594;</i> pointer</button>
+    <span class="toolbar-label" style="margin-left:6px;">do:</span>
+    <button id="derefBtn" class="mint">*p dereference</button>
+    <button id="reassignBtn" class="ghost">retarget pointer</button>
+    <button id="nullBtn" class="sun">assign nullptr</button>
+    <button id="clearBtn" class="ghost">clear board</button>
+  </div>
+
+  <div class="canvas-panel" id="canvasPanel">
+    <div class="zone-label">variables</div>
+    <div class="zone" id="varZone">
+      <div class="cards-row" id="varRow"></div>
+    </div>
+    <hr class="zone-divider">
+    <div class="zone-label ptr-label">pointers</div>
+    <div class="zone" id="ptrZone">
+      <div class="cards-row" id="ptrRow"></div>
+    </div>
+    <svg class="arrows" id="arrowSvg">
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#E07A5F"></path>
+        </marker>
+      </defs>
+    </svg>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="varModalOverlay">
+  <div class="modal">
+    <h3>New variable</h3>
+    <label>Name</label>
+    <input id="varNameInput" placeholder="y" maxlength="10">
+    <label>Initial value</label>
+    <input id="varValInput" placeholder="20" inputmode="numeric">
+    <div class="err-text" id="varErr"></div>
+    <div class="modal-actions">
+      <button class="ghost" id="varCancel">cancel</button>
+      <button class="primary" id="varCreate">create</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ptrModalOverlay">
+  <div class="modal">
+    <h3>New pointer</h3>
+    <label>Name</label>
+    <input id="ptrNameInput" placeholder="p" maxlength="10">
+    <label>Points to</label>
+    <select id="ptrTargetInput"></select>
+    <div class="err-text" id="ptrErr"></div>
+    <div class="modal-actions">
+      <button class="ghost" id="ptrCancel">cancel</button>
+      <button class="primary" id="ptrCreate">create</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="reassignModalOverlay">
+  <div class="modal">
+    <h3>Retarget pointer</h3>
+    <label>Which pointer</label>
+    <select id="reassignPtrInput"></select>
+    <label>New target</label>
+    <select id="reassignTargetInput"></select>
+    <div class="err-text" id="reassignErr"></div>
+    <div class="modal-actions">
+      <button class="ghost" id="reassignCancel">cancel</button>
+      <button class="primary" id="reassignConfirm">retarget</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="derefModalOverlay">
+  <div class="modal">
+    <h3>Dereference *p</h3>
+    <label>Which pointer</label>
+    <select id="derefPtrInput"></select>
+    <div class="err-text" id="derefErr"></div>
+    <div class="modal-actions">
+      <button class="ghost" id="derefCancel">cancel</button>
+      <button class="primary" id="derefConfirm">dereference</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="nullModalOverlay">
+  <div class="modal">
+    <h3>Assign nullptr</h3>
+    <label>Which pointer</label>
+    <select id="nullPtrInput"></select>
+    <div class="err-text" id="nullErr"></div>
+    <div class="modal-actions">
+      <button class="ghost" id="nullCancel">cancel</button>
+      <button class="primary" id="nullConfirm">assign</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+
+let vars = {};
+let ptrs = {};
+let nextVarAddr = 0x1000;
+let nextPtrAddr = 0x2000;
+
+const varRow = document.getElementById('varRow');
+const ptrRow = document.getElementById('ptrRow');
+const arrowSvg = document.getElementById('arrowSvg');
+const canvasPanel = document.getElementById('canvasPanel');
+const toastEl = document.getElementById('toast');
+
+function newVarAddr(){ const a = nextVarAddr; nextVarAddr += 4; return '0x' + a.toString(16); }
+function newPtrAddr(){ const a = nextPtrAddr; nextPtrAddr += 8; return '0x' + a.toString(16); }
+
+function render(){
+  varRow.innerHTML = '';
+  ptrRow.innerHTML = '';
+  const varNames = Object.keys(vars);
+  if (varNames.length === 0){
+    varRow.innerHTML = '<div class="empty-hint">no variables yet ~ press "variable" to add one</div>';
+  }
+  varNames.forEach(name => {
+    const v = vars[name];
+    const el = document.createElement('div');
+    el.className = 'mem-card var-card';
+    el.id = 'card-var-' + name;
+    el.style.animationDelay = (Math.random()*2).toFixed(1) + 's';
+    el.innerHTML =
+      '<button class="del-btn" data-kind="var" data-name="' + name + '" aria-label="Delete ' + name + '">&times;</button>' +
+      '<div class="name">' + v.name + '</div>' +
+      '<div class="type">' + v.type + '</div>' +
+      '<div class="addr">' + v.addr + '</div>' +
+      '<div class="val">= <b>' + v.value + '</b></div>';
+    varRow.appendChild(el);
+  });
+
+  const ptrNames = Object.keys(ptrs);
+  if (ptrNames.length === 0){
+    ptrRow.innerHTML = '<div class="empty-hint">no pointers yet ~ press "pointer" to add one</div>';
+  }
+  ptrNames.forEach(name => {
+    const p = ptrs[name];
+    const el = document.createElement('div');
+    el.className = 'mem-card pointer-card';
+    el.id = 'card-ptr-' + name;
+    el.style.animationDelay = (Math.random()*2).toFixed(1) + 's';
+    const targetLabel = p.target && vars[p.target] ? vars[p.target].addr : 'nullptr';
+    el.innerHTML =
+      '<button class="del-btn" data-kind="ptr" data-name="' + name + '" aria-label="Delete ' + name + '">&times;</button>' +
+      '<div class="name">' + p.name + '</div>' +
+      '<div class="type">' + p.type + '</div>' +
+      '<div class="addr">' + p.addr + '</div>' +
+      '<div class="target">&rarr; ' + targetLabel + '</div>';
+    ptrRow.appendChild(el);
+  });
+
+  document.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const kind = btn.getAttribute('data-kind');
+      const name = btn.getAttribute('data-name');
+      if (kind === 'var'){
+        delete vars[name];
+        Object.keys(ptrs).forEach(pn => { if (ptrs[pn].target === name) ptrs[pn].target = null; });
+      } else {
+        delete ptrs[name];
+      }
+      render();
+    });
+  });
+
+  refreshTargetSelect();
+  requestAnimationFrame(drawArrows);
+}
+
+function drawArrows(){
+  while (arrowSvg.childNodes.length > 1) arrowSvg.removeChild(arrowSvg.lastChild);
+  const panelRect = canvasPanel.getBoundingClientRect();
+  Object.keys(ptrs).forEach(name => {
+    const p = ptrs[name];
+    if (!p.target || !vars[p.target]) return;
+    const fromEl = document.getElementById('card-ptr-' + name);
+    const toEl = document.getElementById('card-var-' + p.target);
+    if (!fromEl || !toEl) return;
+    const f = fromEl.getBoundingClientRect();
+    const t = toEl.getBoundingClientRect();
+    const x1 = f.left - panelRect.left + f.width/2;
+    const y1 = f.top - panelRect.top;
+    const x2 = t.left - panelRect.left + t.width/2;
+    const y2 = t.top - panelRect.top + t.height;
+    const midY = (y1 + y2) / 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    const d = 'M ' + x1 + ' ' + y1 + ' C ' + x1 + ' ' + midY + ', ' + x2 + ' ' + midY + ', ' + x2 + ' ' + y2;
+    path.setAttribute('d', d);
+    path.setAttribute('stroke', '#E07A5F');
+    path.setAttribute('stroke-width', '2.75');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('marker-end', 'url(#arrowhead)');
+    path.setAttribute('stroke-linecap', 'round');
+    arrowSvg.appendChild(path);
+  });
+}
+window.addEventListener('resize', () => requestAnimationFrame(drawArrows));
+
+function setVar(name, type, value){
+  if (!vars[name]) vars[name] = { name, type, addr: newVarAddr(), value };
+  else vars[name].value = value;
+  render();
+}
+function setPtr(name, type, targetName){
+  if (!ptrs[name]) ptrs[name] = { name, type, addr: newPtrAddr(), target: targetName || null };
+  else ptrs[name].target = targetName || null;
+  render();
+}
+function showDeref(ptrName){
+  const p = ptrs[ptrName];
+  if (!p || !p.target || !vars[p.target]){
+    flashToast('Oops! Cannot dereference a nullptr.');
+    return;
+  }
+  const v = vars[p.target];
+  const ptrEl = document.getElementById('card-ptr-' + ptrName);
+  const varEl = document.getElementById('card-var-' + p.target);
+  [ptrEl, varEl].forEach(el => { if (el) el.classList.add('glow'); });
+  setTimeout(() => { [ptrEl, varEl].forEach(el => { if (el) el.classList.remove('glow'); }); }, 1400);
+
+  const bubble = document.createElement('div');
+  bubble.className = 'deref-bubble';
+  bubble.textContent = '*' + ptrName + ' = ' + v.value;
+  canvasPanel.appendChild(bubble);
+  const panelRect = canvasPanel.getBoundingClientRect();
+  const vr = varEl.getBoundingClientRect();
+  bubble.style.left = (vr.left - panelRect.left + vr.width/2 - 30) + 'px';
+  bubble.style.top = (vr.top - panelRect.top - 36) + 'px';
+  setTimeout(() => bubble.remove(), 1600);
+}
+function flashToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(flashToast._t);
+  flashToast._t = setTimeout(() => toastEl.classList.remove('show'), 2200);
+}
+
+const varModal = document.getElementById('varModalOverlay');
+const ptrModal = document.getElementById('ptrModalOverlay');
+const derefModal = document.getElementById('derefModalOverlay');
+const nullModal = document.getElementById('nullModalOverlay');
+
+document.getElementById('addVarBtn').addEventListener('click', () => {
+  document.getElementById('varNameInput').value = '';
+  document.getElementById('varValInput').value = '';
+  document.getElementById('varErr').textContent = '';
+  varModal.classList.add('show');
+  document.getElementById('varNameInput').focus();
+});
+document.getElementById('varCancel').addEventListener('click', () => varModal.classList.remove('show'));
+document.getElementById('varCreate').addEventListener('click', () => {
+  const name = document.getElementById('varNameInput').value.trim();
+  const valRaw = document.getElementById('varValInput').value.trim();
+  const errEl = document.getElementById('varErr');
+  if (!name || !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)){
+    errEl.textContent = 'Enter a valid variable name.'; return;
+  }
+  if (vars[name] || ptrs[name]){ errEl.textContent = 'That name is already used.'; return; }
+  if (valRaw === '' || isNaN(Number(valRaw))){ errEl.textContent = 'Enter a numeric value.'; return; }
+  setVar(name, 'int', Number(valRaw));
+  varModal.classList.remove('show');
+});
+
+function refreshTargetSelect(){
+  const sel = document.getElementById('ptrTargetInput');
+  const prev = sel.value;
+  sel.innerHTML = '';
+  const noneOpt = document.createElement('option');
+  noneOpt.value = ''; noneOpt.textContent = 'nullptr';
+  sel.appendChild(noneOpt);
+  Object.keys(vars).forEach(name => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = name + ' (' + vars[name].addr + ')';
+    sel.appendChild(o);
+  });
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
+document.getElementById('addPtrBtn').addEventListener('click', () => {
+  document.getElementById('ptrNameInput').value = '';
+  document.getElementById('ptrErr').textContent = '';
+  refreshTargetSelect();
+  ptrModal.classList.add('show');
+  document.getElementById('ptrNameInput').focus();
+});
+document.getElementById('ptrCancel').addEventListener('click', () => ptrModal.classList.remove('show'));
+document.getElementById('ptrCreate').addEventListener('click', () => {
+  const name = document.getElementById('ptrNameInput').value.trim();
+  const target = document.getElementById('ptrTargetInput').value;
+  const errEl = document.getElementById('ptrErr');
+  if (!name || !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)){
+    errEl.textContent = 'Enter a valid pointer name.'; return;
+  }
+  if (vars[name] || ptrs[name]){ errEl.textContent = 'That name is already used.'; return; }
+  setPtr(name, 'int*', target || null);
+  ptrModal.classList.remove('show');
+});
+
+document.getElementById('derefBtn').addEventListener('click', () => {
+  const names = Object.keys(ptrs);
+  if (names.length === 0){ flashToast('Create a pointer first.'); return; }
+  document.getElementById('derefErr').textContent = '';
+  const sel = document.getElementById('derefPtrInput');
+  const prev = sel.value;
+  sel.innerHTML = '';
+  names.forEach(name => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = name + ' (' + ptrs[name].addr + ')';
+    sel.appendChild(o);
+  });
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+  derefModal.classList.add('show');
+});
+document.getElementById('derefCancel').addEventListener('click', () => derefModal.classList.remove('show'));
+document.getElementById('derefConfirm').addEventListener('click', () => {
+  const name = document.getElementById('derefPtrInput').value;
+  const errEl = document.getElementById('derefErr');
+  if (!name || !ptrs[name]){ errEl.textContent = 'Pick a pointer first.'; return; }
+  derefModal.classList.remove('show');
+  showDeref(name);
+});
+
+const reassignModal = document.getElementById('reassignModalOverlay');
+function refreshReassignSelects(){
+  const ptrSel = document.getElementById('reassignPtrInput');
+  const prevPtr = ptrSel.value;
+  ptrSel.innerHTML = '';
+  Object.keys(ptrs).forEach(name => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = name + ' (' + ptrs[name].addr + ')';
+    ptrSel.appendChild(o);
+  });
+  if ([...ptrSel.options].some(o => o.value === prevPtr)) ptrSel.value = prevPtr;
+
+  const targetSel = document.getElementById('reassignTargetInput');
+  const prevTarget = targetSel.value;
+  targetSel.innerHTML = '';
+  const noneOpt = document.createElement('option');
+  noneOpt.value = ''; noneOpt.textContent = 'nullptr';
+  targetSel.appendChild(noneOpt);
+  Object.keys(vars).forEach(name => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = name + ' (' + vars[name].addr + ')';
+    targetSel.appendChild(o);
+  });
+  if ([...targetSel.options].some(o => o.value === prevTarget)) targetSel.value = prevTarget;
+}
+document.getElementById('reassignBtn').addEventListener('click', () => {
+  const ptrNames = Object.keys(ptrs);
+  if (ptrNames.length === 0){ flashToast('Create a pointer first.'); return; }
+  document.getElementById('reassignErr').textContent = '';
+  refreshReassignSelects();
+  const ptrSel = document.getElementById('reassignPtrInput');
+  const targetSel = document.getElementById('reassignTargetInput');
+  const currentTarget = ptrs[ptrSel.value] ? (ptrs[ptrSel.value].target || '') : '';
+  if ([...targetSel.options].some(o => o.value === currentTarget)) targetSel.value = currentTarget;
+  reassignModal.classList.add('show');
+});
+document.getElementById('reassignCancel').addEventListener('click', () => reassignModal.classList.remove('show'));
+document.getElementById('reassignPtrInput').addEventListener('change', () => {
+  const ptrSel = document.getElementById('reassignPtrInput');
+  const targetSel = document.getElementById('reassignTargetInput');
+  const currentTarget = ptrs[ptrSel.value] ? (ptrs[ptrSel.value].target || '') : '';
+  if ([...targetSel.options].some(o => o.value === currentTarget)) targetSel.value = currentTarget;
+});
+document.getElementById('reassignConfirm').addEventListener('click', () => {
+  const ptrName = document.getElementById('reassignPtrInput').value;
+  const target = document.getElementById('reassignTargetInput').value;
+  const errEl = document.getElementById('reassignErr');
+  if (!ptrName || !ptrs[ptrName]){ errEl.textContent = 'Pick a pointer first.'; return; }
+  const oldTarget = ptrs[ptrName].target;
+  setPtr(ptrName, ptrs[ptrName].type, target || null);
+  reassignModal.classList.remove('show');
+  const label = target ? ('&' + target) : 'nullptr';
+  flashToast(ptrName + ' now points to ' + label + '.');
+  if (oldTarget !== (target || null)){
+    const ptrEl = document.getElementById('card-ptr-' + ptrName);
+    if (ptrEl){ ptrEl.classList.add('pulse'); setTimeout(() => ptrEl.classList.remove('pulse'), 500); }
+  }
+});
+
+document.getElementById('nullBtn').addEventListener('click', () => {
+  const names = Object.keys(ptrs);
+  if (names.length === 0){ flashToast('Create a pointer first.'); return; }
+  document.getElementById('nullErr').textContent = '';
+  const sel = document.getElementById('nullPtrInput');
+  const prev = sel.value;
+  sel.innerHTML = '';
+  names.forEach(name => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = name + ' (' + ptrs[name].addr + ')';
+    sel.appendChild(o);
+  });
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+  nullModal.classList.add('show');
+});
+document.getElementById('nullCancel').addEventListener('click', () => nullModal.classList.remove('show'));
+document.getElementById('nullConfirm').addEventListener('click', () => {
+  const name = document.getElementById('nullPtrInput').value;
+  const errEl = document.getElementById('nullErr');
+  if (!name || !ptrs[name]){ errEl.textContent = 'Pick a pointer first.'; return; }
+  ptrs[name].target = null;
+  render();
+  nullModal.classList.remove('show');
+  flashToast(name + ' now points to nullptr.');
+});
+document.getElementById('clearBtn').addEventListener('click', () => {
+  vars = {}; ptrs = {}; nextVarAddr = 0x1000; nextPtrAddr = 0x2000;
+  render();
+  flashToast('Board cleared.');
+});
+
+render();
+})();
+</script>
+</body>
+</html>
