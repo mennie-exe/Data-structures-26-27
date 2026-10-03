@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Array Playground</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --cream:#FFFDF7;
+      --paper:#FFF9EC;
+      --beige:#FFF1D6;
+
+      --terracotta:#FF8A65;
+      --terracotta-dark:#F4511E;
+      --terracotta-ink:#B0350B;
+
+      --mint:#4DD0A7;
+      --mint-dark:#16A87D;
+      --mint-ink:#0B6E52;
+
+      --sun:#FFC93C;
+      --sun-dark:#F2A900;
+
+      --sky:#4FB0E5;
+
+      --slate:#3D405B;
+      --slate-soft:#8B8AA8;
+
+      --line:#FFD98A;
+
+      --card-shadow:3px 5px 0 rgba(61,64,91,.10);
+      --radius:20px;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:"Nunito",sans-serif;
+      color:var(--slate);
+      background:
+        radial-gradient(circle at 10px 10px, rgba(255,201,60,.16) 1.5px, transparent 1.5px),
+        var(--cream);
+      background-size:22px 22px;
+    }
+
+    button,
+    input{
+      font:inherit;
+    }
+
+    button{
+      cursor:pointer;
+    }
+
+    .app{
+      width:min(1120px, calc(100% - 28px));
+      margin:24px auto;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header{
+      background:var(--paper);
+      border:2px solid var(--line);
+      border-radius:var(--radius);
+      padding:20px 22px;
+      box-shadow:var(--card-shadow);
+    }
+
+    .header-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:30px;
+      font-weight:800;
+      letter-spacing:-.5px;
+    }
+
+    .brand p{
+      margin:4px 0 0;
+      color:var(--slate-soft);
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .toolbar{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .toolbar button{
+      border:2px solid transparent;
+      border-radius:13px;
+      padding:9px 14px;
+      font-weight:800;
+      font-size:13px;
+      transition:.18s ease;
+    }
+
+    .toolbar button:hover{
+      transform:translateY(-1px);
+    }
+
+    .toolbar .mode-btn{
+      background:var(--beige);
+      color:var(--slate);
+      border-color:#FFE1AA;
+    }
+
+    .toolbar .mode-btn.active{
+      background:var(--mint);
+      color:var(--mint-ink);
+      border-color:var(--mint-dark);
+    }
+
+    .toolbar .reset-btn{
+      background:var(--terracotta);
+      color:white;
+      border-color:var(--terracotta-dark);
+    }
+
+    /* =========================
+       STAGE
+    ========================= */
+
+    .stage{
+      margin-top:16px;
+      background:var(--paper);
+      border:2px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--card-shadow);
+      padding:20px;
+    }
+
+    .stage-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .stage-title h2{
+      margin:0;
+      font-size:22px;
+      font-weight:800;
+    }
+
+    .stage-title p{
+      margin:5px 0 0;
+      color:var(--slate-soft);
+      font-size:13px;
+      font-weight:600;
+    }
+
+    .stats{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .stat{
+      min-width:90px;
+      padding:8px 11px;
+      border-radius:13px;
+      background:var(--beige);
+      border:2px solid #FFE1AA;
+      text-align:center;
+    }
+
+    .stat-label{
+      display:block;
+      font-size:10px;
+      color:var(--slate-soft);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.5px;
+    }
+
+    .stat-value{
+      display:block;
+      margin-top:1px;
+      font-family:"Fira Code",monospace;
+      font-size:15px;
+      font-weight:600;
+    }
+
+    /* =========================
+       ARRAY
+    ========================= */
+
+    .array-wrap{
+      margin-top:22px;
+      padding:20px 14px 16px;
+      border-radius:18px;
+      background:#FFFDF8;
+      border:2px dashed var(--line);
+      overflow-x:auto;
+    }
+
+    .array{
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      gap:8px;
+      min-height:100px;
+      padding:10px;
+      min-width:max-content;
+    }
+
+    .cell-wrap{
+      width:72px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+    }
+
+    .cell{
+      width:72px;
+      height:64px;
+      border-radius:15px;
+      border:2px solid #E8D9BE;
+      background:white;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:"Fira Code",monospace;
+      font-size:17px;
+      font-weight:600;
+      position:relative;
+      transition:.18s ease;
+    }
+
+    .cell.empty{
+      background:#FFFDF7;
+      border-style:dashed;
+      color:#C9C0B1;
+    }
+
+    .cell.target{
+      background:#FFF0E8;
+      border-color:var(--terracotta);
+      color:var(--terracotta-ink);
+      transform:translateY(-3px);
+    }
+
+    .cell.moving{
+      background:#E9FFF7;
+      border-color:var(--mint);
+      color:var(--mint-ink);
+      transform:translateY(-3px);
+    }
+
+    .cell.new{
+      background:#FFF5CC;
+      border-color:var(--sun);
+      color:#8A6500;
+      transform:translateY(-3px);
+    }
+
+    .cell.removing{
+      background:#FFE9E5;
+      border-color:var(--terracotta);
+      color:var(--terracotta-ink);
+      opacity:.65;
+    }
+
+    .cell.copied{
+      background:#E8F6FF;
+      border-color:var(--sky);
+      color:#17658B;
+    }
+
+    .cell.resize{
+      background:#E9FFF7;
+      border-color:var(--mint-dark);
+      color:var(--mint-ink);
+      transform:translateY(-3px);
+    }
+
+    .index-tag{
+      font-family:"Fira Code",monospace;
+      font-size:11px;
+      color:var(--slate-soft);
+      font-weight:500;
+    }
+
+    /* =========================
+       MOVEMENT
+    ========================= */
+
+    .movement{
+      min-height:62px;
+      margin-top:14px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+
+    .movement-main{
+      font-size:17px;
+      font-weight:800;
+    }
+
+    .movement-sub{
+      margin-top:3px;
+      color:var(--slate-soft);
+      font-size:12px;
+      font-weight:600;
+    }
+
+    .arrow-note{
+      margin-top:7px;
+      font-family:"Fira Code",monospace;
+      font-size:12px;
+      color:var(--mint-ink);
+      font-weight:600;
+    }
+
+    .resize-callout{
+      display:none;
+      margin:10px auto 0;
+      width:fit-content;
+      max-width:100%;
+      padding:9px 14px;
+      border-radius:13px;
+      background:#E9FFF7;
+      border:2px solid var(--mint);
+      color:var(--mint-ink);
+      font-weight:800;
+      font-size:13px;
+    }
+
+    .resize-callout.show{
+      display:block;
+    }
+
+    .memory-line{
+      margin-top:8px;
+      text-align:center;
+      color:var(--slate-soft);
+      font-size:12px;
+      font-family:"Fira Code",monospace;
+    }
+
+    /* =========================
+       EXPLANATION
+    ========================= */
+
+    .explain{
+      margin-top:16px;
+      padding:14px 16px;
+      background:#FFF7E8;
+      border:2px solid #FFE1AA;
+      border-radius:16px;
+    }
+
+    .explain-title{
+      font-weight:800;
+      font-size:14px;
+    }
+
+    .explain-text{
+      margin-top:4px;
+      color:#6E6B78;
+      font-size:13px;
+      line-height:1.55;
+      font-weight:600;
+    }
+
+    /* =========================
+       CONTROLS
+    ========================= */
+
+    .controls{
+      margin-top:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .controls button{
+      border:2px solid;
+      border-radius:13px;
+      padding:10px 17px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .prev{
+      background:white;
+      color:var(--slate);
+      border-color:#D8D4CC;
+    }
+
+    .next{
+      background:var(--mint);
+      color:var(--mint-ink);
+      border-color:var(--mint-dark);
+    }
+
+    .finish{
+      background:var(--sun);
+      color:#6C5000;
+      border-color:var(--sun-dark);
+    }
+
+    .controls button:disabled{
+      opacity:.4;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .step-description{
+      margin-top:9px;
+      text-align:center;
+      color:var(--slate-soft);
+      font-size:11px;
+      font-weight:700;
+    }
+
+    /* =========================
+       BOTTOM PANEL
+    ========================= */
+
+    .bottom{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+
+    .panel{
+      background:var(--paper);
+      border:2px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--card-shadow);
+      padding:16px;
+    }
+
+    .panel-title{
+      font-size:14px;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .form-row{
+      display:flex;
+      gap:9px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .field{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      background:white;
+      border:2px solid #E8D9BE;
+      border-radius:13px;
+      padding:7px 10px;
+    }
+
+    .field label{
+      font-size:11px;
+      color:var(--slate-soft);
+      font-weight:800;
+    }
+
+    .field input{
+      width:75px;
+      border:0;
+      outline:0;
+      background:transparent;
+      font-family:"Fira Code",monospace;
+      color:var(--slate);
+      font-size:13px;
+      font-weight:600;
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .action-btn{
+      border:2px solid;
+      border-radius:13px;
+      padding:9px 14px;
+      font-size:12px;
+      font-weight:800;
+      transition:.18s ease;
+    }
+
+    .action-btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .insert-action{
+      background:var(--terracotta);
+      color:white;
+      border-color:var(--terracotta-dark);
+    }
+
+    .insert-action.active{
+      box-shadow:0 0 0 3px rgba(255,138,101,.22);
+    }
+
+    .delete-action{
+      background:#FFE9E5;
+      color:var(--terracotta-ink);
+      border-color:var(--terracotta);
+    }
+
+    .delete-action.active{
+      box-shadow:0 0 0 3px rgba(255,138,101,.22);
+    }
+
+    .legend{
+      display:flex;
+      gap:13px;
+      flex-wrap:wrap;
+      margin-top:12px;
+      color:var(--slate-soft);
+      font-size:11px;
+      font-weight:700;
+    }
+
+    .legend-item{
+      display:flex;
+      align-items:center;
+      gap:5px;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      border:1px solid rgba(0,0,0,.08);
+    }
+
+    .dot.target{background:var(--terracotta);}
+    .dot.moving{background:var(--mint);}
+    .dot.new{background:var(--sun);}
+    .dot.copied{background:var(--sky);}
+
+    /* =========================
+       TOAST
+    ========================= */
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%) translateY(20px);
+      background:var(--slate);
+      color:white;
+      padding:10px 16px;
+      border-radius:13px;
+      font-size:12px;
+      font-weight:800;
+      opacity:0;
+      pointer-events:none;
+      transition:.2s ease;
+      z-index:20;
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+
+    @media(max-width:760px){
+      .header-top,
+      .stage-head{
+        flex-direction:column;
+      }
+
+      .stats{
+        justify-content:flex-start;
+      }
+
+      .cell,
+      .cell-wrap{
+        width:60px;
+      }
+
+      .cell{
+        height:56px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <h1>Array Playground</h1>
+      </div>
+
+      <div class="toolbar">
+        <button id="dynamicBtn" class="mode-btn active">Dynamic Array</button>
+        <button id="staticBtn" class="mode-btn">Static Array</button>
+        <button id="resetBtn" class="reset-btn">Reset</button>
+      </div>
+    </div>
+  </header>
+
+
+  <section class="stage">
+
+    <div class="stage-head">
+
+      <div class="stage-title">
+        <h2 id="stageTitle">Dynamic Array</h2>
+        <p id="stageHint">Insert and delete elements step-by-step.</p>
+      </div>
+
+      <div class="stats">
+
+        <div class="stat">
+          <span class="stat-label">Size</span>
+          <span id="sizeStat" class="stat-value">4</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-label">Capacity</span>
+          <span id="capacityStat" class="stat-value">6</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-label">Step</span>
+          <span id="stepStat" class="stat-value">—</span>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="array-wrap">
+      <div id="array" class="array"></div>
+    </div>
+
+
+    <div class="movement">
+      <div id="movementMain" class="movement-main">
+        Ready
+      </div>
+
+      <div id="movementSub" class="movement-sub">
+        Choose an operation below.
+      </div>
+
+      <div id="arrowNote" class="arrow-note"></div>
+
+      <div id="resizeCallout" class="resize-callout">
+        Resize: capacity increased
+      </div>
+    </div>
+
+
+    <div id="memoryLine" class="memory-line">
+      Memory: 6 slots allocated
+    </div>
+
+
+    <div class="explain">
+      <div id="explainTitle" class="explain-title">
+        How it works
+      </div>
+
+      <div id="explainText" class="explain-text">
+        Choose an index and an operation to start.
+      </div>
+    </div>
+
+
+    <div class="controls">
+      <button id="prevBtn" class="prev">← Previous</button>
+      <button id="nextBtn" class="next">Next →</button>
+      <button id="finishBtn" class="finish">Finish ✓</button>
+    </div>
+
+    <div id="stepDescription" class="step-description">
+      You can move one step at a time.
+    </div>
+
+  </section>
+
+
+  <section class="bottom">
+
+    <div class="panel">
+
+      <div class="panel-title">
+        Choose an index and operation
+      </div>
+
+      <div class="form-row">
+
+        <div class="field">
+          <label for="indexInput">Index</label>
+          <input
+            id="indexInput"
+            type="number"
+            min="0"
+            value="2"
+          />
+        </div>
+
+        <div id="valueField" class="field">
+          <label for="valueInput">Value</label>
+          <input
+            id="valueInput"
+            type="number"
+            value="25"
+          />
+        </div>
+
+        <div class="actions">
+          <button id="insertAction" class="action-btn insert-action">
+            Insert here
+          </button>
+
+          <button id="deleteAction" class="action-btn delete-action">
+            Delete here
+          </button>
+        </div>
+
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <span class="dot target"></span>
+          Target
+        </div>
+
+        <div class="legend-item">
+          <span class="dot moving"></span>
+          Moving / Resize
+        </div>
+
+        <div class="legend-item">
+          <span class="dot new"></span>
+          New value
+        </div>
+
+        <div class="legend-item">
+          <span class="dot copied"></span>
+          Copied
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<div id="toast" class="toast"></div>
+
+
+<script>
+
+  let mode = "dynamic";
+
+  let values = [10, 20, 30, 40];
+
+  let capacity = 6;
+
+  let operation = null;
+
+  let step = 0;
+
+  const initialValues = [10, 20, 30, 40];
+
+  const initialCapacity = 6;
+
+  const $ = id => document.getElementById(id);
+
+
+  /* =========================================
+     BASIC UI
+  ========================================= */
+
+  function showToast(message){
+    const toast = $("toast");
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 1800);
+  }
+
+
+  function updateOperationButtons(activeOperation){
+
+    $("insertAction").classList.toggle(
+      "active",
+      activeOperation === "insert"
+    );
+
+    $("deleteAction").classList.toggle(
+      "active",
+      activeOperation === "delete"
+    );
+  }
+
+
+  function setMode(newMode){
+
+    if(operation){
+      showToast("Finish the current operation first.");
+      return;
+    }
+
+    mode = newMode;
+
+    $("dynamicBtn").classList.toggle(
+      "active",
+      mode === "dynamic"
+    );
+
+    $("staticBtn").classList.toggle(
+      "active",
+      mode === "static"
+    );
+
+    resetArray(false);
+
+    render();
+  }
+
+
+  function resetArray(showMessage = true){
+
+    operation = null;
+
+    step = 0;
+
+    values = [...initialValues];
+
+    capacity =
+      mode === "dynamic"
+        ? initialCapacity
+        : initialValues.length;
+
+    updateOperationButtons(null);
+
+    if(showMessage){
+      showToast("Array reset.");
+    }
+
+    render();
+  }
+
+
+  /* =========================================
+     INSERT
+  ========================================= */
+
+  function buildInsert(index, newValue){
+
+    if(index < 0 || index > values.length){
+      showToast("Invalid index.");
+      return null;
+    }
+
+    const original = [...values];
+
+    const isFull = original.length >= capacity;
+
+    const steps = [];
+
+    /*
+      STATIC ARRAY
+      ----------------------------
+      No resize is allowed.
+    */
+
+    if(mode === "static" && isFull){
+
+      steps.push({
+        type:"target",
+        values:[...original],
+        capacity,
+        main:`Target index ${index}`,
+        sub:"The array is already full.",
+        arrow:"",
+        explanationTitle:"Insertion blocked",
+        explanation:
+          "Static arrays have a fixed capacity, so there is no new memory to allocate.",
+        description:
+          "Static Array → full → insertion cannot continue."
+      });
+
+      return {
+        type:"insert",
+        steps,
+        commit:null
+      };
+    }
+
+
+    /*
+      DYNAMIC ARRAY
+      ----------------------------
+      IMPORTANT:
+      Resize is ONE separate step.
+
+      We do NOT animate copying the
+      whole array during resize.
+
+      Resize simply means:
+      capacity gets bigger.
+
+      Then the normal shift starts.
+    */
+
+    let workingCapacity = capacity;
+
+    if(mode === "dynamic" && isFull){
+
+      workingCapacity = Math.max(
+        capacity * 2,
+        capacity + 1
+      );
+
+      steps.push({
+        type:"resize",
+        values:[...original],
+        capacity:workingCapacity,
+        main:"Resize",
+        sub:`Capacity increased from ${capacity} to ${workingCapacity}.`,
+        arrow:"",
+        explanationTitle:"Why resize?",
+        explanation:
+          "The dynamic array is full, so it allocates a larger memory block. The array is now ready for the insertion.",
+        description:
+          "Resize → capacity increases. No element-by-element copy is shown here."
+      });
+    }
+
+
+    /*
+      TARGET STEP
+    */
+
+    steps.push({
+      type:"target",
+      values:[...original],
+      capacity:workingCapacity,
+      main:`Target index ${index}`,
+      sub:`We want to insert ${newValue} here.`,
+      arrow:`Insert ${newValue} at index ${index}`,
+      explanationTitle:"Find the target",
+      explanation:
+        "Before changing anything, we identify the exact index where the new value will be inserted.",
+      description:
+        "First, identify the insertion position."
+    });
+
+
+    /*
+      SHIFT RIGHT
+      ----------------------------
+      Copy only.
+
+      The source stays visible.
+      We do NOT make the source empty.
+
+      Example:
+
+      [10][20][30][40]
+                 ↓ copy
+      [10][20][30][40][40]
+
+      Then:
+
+      [10][20][30][40][40]
+             ↓ copy
+      [10][20][30][30][40]
+    */
+
+    const shiftState = [...original];
+
+    for(let i = original.length - 1; i >= index; i--){
+
+      shiftState[i + 1] = shiftState[i];
+
+      steps.push({
+        type:"shift",
+        values:[...shiftState],
+        capacity:workingCapacity,
+        source:i,
+        destination:i + 1,
+        main:`Copy ${original[i]} → index ${i + 1}`,
+        sub:"The original value stays visible while we copy it.",
+        arrow:`index ${i}  →  index ${i + 1}`,
+        explanationTitle:"Shift by copying",
+        explanation:
+          "We copy the element one position to the right. The source is not erased during this step.",
+        description:
+          `Copy element at index ${i} to index ${i + 1}.`
+      });
+    }
+
+
+    /*
+      INSERT
+    */
+
+    const inserted = [...shiftState];
+
+    inserted[index] = newValue;
+
+    steps.push({
+      type:"insert",
+      values:inserted,
+      capacity:workingCapacity,
+      target:index,
+      main:`Insert ${newValue}`,
+      sub:`Place the new value at index ${index}.`,
+      arrow:`${newValue} → index ${index}`,
+      explanationTitle:"Insert the new value",
+      explanation:
+        "All required elements have been shifted, so the target position is now ready for the new value.",
+      description:
+        "The new value is placed in the target index."
+    });
+
+
+    /*
+      FINAL
+    */
+
+    steps.push({
+      type:"final",
+      values:inserted,
+      capacity:workingCapacity,
+      main:"Done ✓",
+      sub:"The insertion is complete.",
+      arrow:"",
+      explanationTitle:"Final array",
+      explanation:
+        "The array now contains the new element in the requested position.",
+      description:
+        "Insertion finished."
+    });
+
+
+    return {
+      type:"insert",
+      steps,
+      commit:{
+        values:inserted,
+        capacity:workingCapacity
+      }
+    };
+  }
+
+
+  /* =========================================
+     DELETE
+  ========================================= */
+
+  function buildDelete(index){
+
+    if(index < 0 || index >= values.length){
+      showToast("Invalid index.");
+      return null;
+    }
+
+    const original = [...values];
+
+    const steps = [];
+
+
+    /*
+      TARGET
+    */
+
+    steps.push({
+      type:"target",
+      values:[...original],
+      capacity,
+      target:index,
+      main:`Target index ${index}`,
+      sub:`We want to delete ${original[index]}.`,
+      arrow:`Delete ${original[index]} at index ${index}`,
+      explanationTitle:"Find the target",
+      explanation:
+        "First we identify the element that needs to be removed.",
+      description:
+        "Identify the element to delete."
+    });
+
+
+    /*
+      SHIFT LEFT
+      ----------------------------
+      Copy only.
+      Source stays visible.
+    */
+
+    const shiftState = [...original];
+
+    for(let i = index; i < original.length - 1; i++){
+
+      shiftState[i] = shiftState[i + 1];
+
+      steps.push({
+        type:"delete-shift",
+        values:[...shiftState],
+        capacity,
+        source:i + 1,
+        destination:i,
+        main:`Copy ${original[i + 1]} → index ${i}`,
+        sub:"The next element moves one position to the left.",
+        arrow:`index ${i + 1}  →  index ${i}`,
+        explanationTitle:"Shift left by copying",
+        explanation:
+          "Each following element is copied one position to the left. The source remains visible during the copy.",
+        description:
+          `Copy element at index ${i + 1} to index ${i}.`
+      });
+    }
+
+
+    /*
+      REMOVE LAST DUPLICATE
+    */
+
+    const removed = shiftState.slice(0, -1);
+
+    steps.push({
+      type:"remove",
+      values:removed,
+      capacity,
+      main:"Remove the last duplicate",
+      sub:"The extra copy at the end is no longer needed.",
+      arrow:"",
+      explanationTitle:"Clean up",
+      explanation:
+        "After shifting everything left, the last position contains a duplicate. We remove that final duplicate.",
+      description:
+        "Remove the extra element at the end."
+    });
+
+
+    /*
+      FINAL
+    */
+
+    steps.push({
+      type:"final",
+      values:removed,
+      capacity,
+      main:"Done ✓",
+      sub:"The deletion is complete.",
+      arrow:"",
+      explanationTitle:"Final array",
+      explanation:
+        "The target element has been removed and all following elements have shifted left.",
+      description:
+        "Deletion finished."
+    });
+
+
+    return {
+      type:"delete",
+      steps,
+      commit:{
+        values:removed,
+        capacity
+      }
+    };
+  }
+
+
+  /* =========================================
+     START OPERATION
+  ========================================= */
+
+  function startInsert(){
+
+    if(operation){
+      showToast("Finish the current operation first.");
+      return;
+    }
+
+    const index = Number($("indexInput").value);
+
+    const value = Number($("valueInput").value);
+
+    if(!Number.isInteger(index)){
+      showToast("Enter a valid index.");
+      return;
+    }
+
+    if(!Number.isFinite(value)){
+      showToast("Enter a valid value.");
+      return;
+    }
+
+    const built = buildInsert(index, value);
+
+    if(!built){
+      return;
+    }
+
+    operation = built;
+
+    step = 0;
+
+    updateOperationButtons("insert");
+
+    render();
+  }
+
+
+  function startDelete(){
+
+    if(operation){
+      showToast("Finish the current operation first.");
+      return;
+    }
+
+    const index = Number($("indexInput").value);
+
+    if(!Number.isInteger(index)){
+      showToast("Enter a valid index.");
+      return;
+    }
+
+    const built = buildDelete(index);
+
+    if(!built){
+      return;
+    }
+
+    operation = built;
+
+    step = 0;
+
+    updateOperationButtons("delete");
+
+    render();
+  }
+
+
+  /* =========================================
+     FINISH
+  ========================================= */
+
+  function finishOperation(){
+
+    if(!operation){
+      return;
+    }
+
+    const finalStep =
+      operation.steps[operation.steps.length - 1];
+
+    if(operation.commit){
+
+      values = [...operation.commit.values];
+
+      capacity = operation.commit.capacity;
+    }
+
+    operation = null;
+
+    step = 0;
+
+    updateOperationButtons(null);
+
+    render();
+
+    showToast("Finished ✓ You can start another operation.");
+  }
+
+
+  /* =========================================
+     STEP CONTROLS
+  ========================================= */
+
+  function nextStep(){
+
+    if(!operation){
+      return;
+    }
+
+    if(step < operation.steps.length - 1){
+
+      step++;
+
+      render();
+
+      return;
+    }
+
+    finishOperation();
+  }
+
+
+  function previousStep(){
+
+    if(!operation){
+      return;
+    }
+
+    if(step > 0){
+
+      step--;
+
+      render();
+    }
+  }
+
+
+  /* =========================================
+     RENDER
+  ========================================= */
+
+  function render(){
+
+    $("dynamicBtn").classList.toggle(
+      "active",
+      mode === "dynamic"
+    );
+
+    $("staticBtn").classList.toggle(
+      "active",
+      mode === "static"
+    );
+
+
+    const current =
+      operation
+        ? operation.steps[step]
+        : null;
+
+
+    const displayValues =
+      current
+        ? current.values
+        : values;
+
+
+    const displayCapacity =
+      current
+        ? current.capacity
+        : capacity;
+
+
+    /*
+      HEADER
+    */
+
+    $("stageTitle").textContent =
+      mode === "dynamic"
+        ? "Dynamic Array"
+        : "Static Array";
+
+
+    $("stageHint").textContent =
+      mode === "dynamic"
+        ? "Capacity can grow when the array is full."
+        : "Capacity is fixed and cannot grow.";
+
+
+    $("sizeStat").textContent =
+      displayValues.length;
+
+
+    $("capacityStat").textContent =
+      displayCapacity;
+
+
+    $("stepStat").textContent =
+      current
+        ? `${step + 1}/${operation.steps.length}`
+        : "—";
+
+
+    /*
+      ARRAY
+    */
+
+    const arrayEl = $("array");
+
+    arrayEl.innerHTML = "";
+
+
+    for(let i = 0; i < displayCapacity; i++){
+
+      const wrap = document.createElement("div");
+
+      wrap.className = "cell-wrap";
+
+
+      const cell = document.createElement("div");
+
+      cell.className = "cell";
+
+
+      const valueExists =
+        i < displayValues.length &&
+        displayValues[i] !== undefined;
+
+
+      if(valueExists){
+
+        cell.textContent =
+          displayValues[i];
+
+      }else{
+
+        cell.textContent = "·";
+
+        cell.classList.add("empty");
+      }
+
+
+      if(current){
+
+        if(
+          current.target === i ||
+          (
+            current.type === "target" &&
+            i === current.target
+          )
+        ){
+          cell.classList.add("target");
+        }
+
+
+        if(
+          current.type === "shift" &&
+          i === current.source
+        ){
+          cell.classList.add("moving");
+        }
+
+
+        if(
+          current.type === "shift" &&
+          i === current.destination
+        ){
+          cell.classList.add("copied");
+        }
+
+
+        if(
+          current.type === "delete-shift" &&
+          i === current.source
+        ){
+          cell.classList.add("moving");
+        }
+
+
+        if(
+          current.type === "delete-shift" &&
+          i === current.destination
+        ){
+          cell.classList.add("copied");
+        }
+
+
+        if(
+          current.type === "insert" &&
+          current.target === i
+        ){
+          cell.classList.add("new");
+        }
+
+
+        if(
+          current.type === "remove" &&
+          i === displayValues.length
+        ){
+          cell.classList.add("removing");
+        }
+
+
+        /*
+          Resize is visually different:
+          it only emphasizes that the
+          capacity became larger.
+        */
+
+        if(
+          current.type === "resize" &&
+          i >= values.length
+        ){
+          cell.classList.add("resize");
+        }
+      }
+
+
+      const indexTag = document.createElement("div");
+
+      indexTag.className = "index-tag";
+
+      indexTag.textContent = `[${i}]`;
+
+
+      wrap.appendChild(cell);
+
+      wrap.appendChild(indexTag);
+
+      arrayEl.appendChild(wrap);
+    }
+
+
+    /*
+      MOVEMENT
+    */
+
+    if(current){
+
+      $("movementMain").textContent =
+        current.main || "";
+
+      $("movementSub").textContent =
+        current.sub || "";
+
+      $("arrowNote").textContent =
+        current.arrow || "";
+
+
+      $("explainTitle").textContent =
+        current.explanationTitle || "Explanation";
+
+
+      $("explainText").textContent =
+        current.explanation || "";
+
+
+      $("stepDescription").textContent =
+        current.description || "";
+
+
+      /*
+        Resize callout only appears
+        during the actual resize step.
+      */
+
+      $("resizeCallout").classList.toggle(
+        "show",
+        current.type === "resize"
+      );
+
+    }else{
+
+      $("movementMain").textContent =
+        "Ready";
+
+      $("movementSub").textContent =
+        "Choose an operation below.";
+
+      $("arrowNote").textContent = "";
+
+      $("resizeCallout").classList.remove("show");
+
+      $("explainTitle").textContent =
+        "How it works";
+
+      $("explainText").textContent =
+        "Choose an index and an operation to start.";
+
+      $("stepDescription").textContent =
+        "You can move one step at a time.";
+    }
+
+
+    /*
+      MEMORY
+    */
+
+    $("memoryLine").textContent =
+      `Memory: ${displayCapacity} slots allocated`;
+
+
+    /*
+      CONTROLS
+    */
+
+    $("prevBtn").disabled =
+      !operation || step === 0;
+
+
+    $("nextBtn").disabled =
+      !operation;
+
+
+    $("finishBtn").style.display =
+      operation
+        ? "inline-block"
+        : "none";
+  }
+
+
+  /* =========================================
+     EVENTS
+  ========================================= */
+
+  $("dynamicBtn").addEventListener(
+    "click",
+    () => setMode("dynamic")
+  );
+
+
+  $("staticBtn").addEventListener(
+    "click",
+    () => setMode("static")
+  );
+
+
+  $("resetBtn").addEventListener(
+    "click",
+    () => resetArray(true)
+  );
+
+
+  $("insertAction").addEventListener(
+    "click",
+    startInsert
+  );
+
+
+  $("deleteAction").addEventListener(
+    "click",
+    startDelete
+  );
+
+
+  $("prevBtn").addEventListener(
+    "click",
+    previousStep
+  );
+
+
+  $("nextBtn").addEventListener(
+    "click",
+    nextStep
+  );
+
+
+  $("finishBtn").addEventListener(
+    "click",
+    finishOperation
+  );
+
+
+  /* =========================================
+     INITIAL STATE
+  ========================================= */
+
+  updateOperationButtons(null);
+
+  render();
+
+</script>
+
+</body>
+</html>
