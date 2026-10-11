@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sorting Algorithms Visualizer</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        /* =========================
+              CONTROLS
+        ========================= */
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+
+            display: flex;
+            gap: 10px;
+
+            justify-content: center;
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            margin-bottom: 20px;
+        }
+
+        select,
+        button {
+            padding: 10px 15px;
+
+            border-radius: 8px;
+
+            border: 1px solid #ccc;
+
+            background: white;
+
+            cursor: pointer;
+
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #eee;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+              VISUALIZER
+        ========================= */
+
+        .visualizer {
+            background: white;
+
+            padding: 30px;
+
+            border-radius: 12px;
+
+            min-height: 500px;
+        }
+
+        /* =========================
+              NORMAL ARRAY
+        ========================= */
+
+        .array {
+
+            height: 300px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: flex-end;
+
+            gap: 15px;
+
+            border-bottom: 2px solid #333;
+
+            padding-bottom: 10px;
+        }
+
+        .item {
+
+            width: 70px;
+
+            text-align: center;
+        }
+
+        .bar {
+
+            width: 60px;
+
+            margin: auto;
+
+            background: #9ca3af;
+
+            border-radius: 7px 7px 0 0;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: flex-start;
+
+            padding-top: 8px;
+
+            font-weight: bold;
+
+            transition: 0.3s;
+        }
+
+        .normal {
+            background: #9ca3af;
+        }
+
+        .compare {
+
+            background: #60a5fa;
+
+            transform: translateY(-10px);
+        }
+
+        .current {
+
+            background: #f59e0b;
+
+            transform: translateY(-10px);
+        }
+
+        .pivot {
+
+            background: #a78bfa;
+
+            transform: translateY(-10px);
+        }
+
+        .sorted {
+            background: #22c55e;
+        }
+
+        .index {
+
+            margin-top: 8px;
+
+            font-size: 13px;
+
+            color: #555;
+        }
+
+        /* =========================
+              INFO
+        ========================= */
+
+        .info {
+
+            margin-top: 25px;
+
+            padding: 20px;
+
+            background: #f8fafc;
+
+            border-radius: 10px;
+        }
+
+        .description {
+
+            font-size: 18px;
+
+            margin-bottom: 15px;
+
+            line-height: 1.6;
+
+            text-align: center;
+        }
+
+        .counter {
+
+            margin-top: 15px;
+
+            text-align: center;
+
+            color: #555;
+        }
+
+        /* =========================
+              LEGEND
+        ========================= */
+
+        .legend {
+
+            margin-top: 20px;
+
+            display: flex;
+
+            gap: 20px;
+
+            justify-content: center;
+
+            flex-wrap: wrap;
+        }
+
+        .legend span {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+        }
+
+        .box {
+
+            width: 15px;
+
+            height: 15px;
+
+            border-radius: 3px;
+        }
+
+        /* =========================
+              MERGE SORT TREE
+        ========================= */
+
+        .merge-tree {
+
+            min-height: 350px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            gap: 35px;
+
+            padding: 20px;
+
+            overflow-x: auto;
+        }
+
+        .tree-row {
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            gap: 30px;
+
+            min-height: 65px;
+        }
+
+        .tree-node {
+
+            min-width: 110px;
+
+            padding: 12px 18px;
+
+            background: #e5e7eb;
+
+            border-radius: 10px;
+
+            text-align: center;
+
+            border: 2px solid #d1d5db;
+
+            transition: 0.3s;
+        }
+
+        .node-values {
+
+            font-size: 18px;
+
+            font-weight: bold;
+        }
+
+        .node-range {
+
+            margin-top: 5px;
+
+            font-size: 11px;
+
+            color: #6b7280;
+        }
+
+        .active-node {
+
+            background: #93c5fd;
+
+            border-color: #2563eb;
+
+            transform: scale(1.08);
+        }
+
+        .merged-node {
+
+            background: #86efac;
+
+            border-color: #16a34a;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+    <h1>
+        Sorting Algorithms Visualizer
+    </h1>
+
+
+    <!-- =========================
+            CONTROLS
+    ========================== -->
+
+    <div class="controls">
+
+        <select id="algorithm">
+
+            <option value="bubble">
+                Bubble Sort
+            </option>
+
+            <option value="selection">
+                Selection Sort
+            </option>
+
+            <option value="insertion">
+                Insertion Sort
+            </option>
+
+            <option value="merge">
+                Merge Sort
+            </option>
+
+            <option value="lomuto">
+                Quick Sort - Lomuto
+            </option>
+
+            <option value="hoare">
+                Quick Sort - Two Pointers
+            </option>
+
+        </select>
+
+
+        <button id="previous">
+            ← Previous
+        </button>
+
+
+        <button id="next">
+            Next →
+        </button>
+
+
+        <button id="reset">
+            Reset
+        </button>
+
+    </div>
+
+
+    <!-- =========================
+            VISUALIZER
+    ========================== -->
+
+    <div class="visualizer">
+
+        <div id="array" class="array"></div>
+
+
+        <div class="info">
+
+            <div
+                id="description"
+                class="description">
+            </div>
+
+
+            <div class="counter">
+
+                Step:
+
+                <span id="stepNumber"></span>
+
+                /
+
+                <span id="totalSteps"></span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+                LEGEND
+        ========================== -->
+
+        <div class="legend">
+
+            <span>
+
+                <span
+                    class="box normal">
+                </span>
+
+                Normal
+
+            </span>
+
+
+            <span>
+
+                <span
+                    class="box compare">
+                </span>
+
+                Compare
+
+            </span>
+
+
+            <span>
+
+                <span
+                    class="box current">
+                </span>
+
+                Current
+
+            </span>
+
+
+            <span>
+
+                <span
+                    class="box pivot">
+                </span>
+
+                Pivot
+
+            </span>
+
+
+            <span>
+
+                <span
+                    class="box sorted">
+                </span>
+
+                Sorted
+
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* ==========================================
+        ORIGINAL ARRAY
+========================================== */
+
+const originalArray = [
+    5,
+    2,
+    6,
+    1,
+    4,
+    3
+];
+
+
+let steps = [];
+
+let currentStep = 0;
+
+
+/* ==========================================
+        CREATE STEP
+========================================== */
+
+function createStep(
+    array,
+    description,
+    highlighted = [],
+    sorted = [],
+    pivot = []
+) {
+
+    return {
+
+        type: "array",
+
+        array: [...array],
+
+        description: description,
+
+        highlighted: [...highlighted],
+
+        sorted: [...sorted],
+
+        pivot: [...pivot]
+
+    };
+}
+
+
+/* ==========================================
+        BUBBLE SORT
+========================================== */
+
+function bubbleSortSteps() {
+
+    let arr =
+        [...originalArray];
+
+    let result = [];
+
+    let sorted = [];
+
+
+    result.push(
+
+        createStep(
+            arr,
+            "Bubble Sort starts. Compare adjacent elements."
+        )
+
+    );
+
+
+    for (
+        let i = 0;
+        i < arr.length;
+        i++
+    ) {
+
+        for (
+            let j = 0;
+            j < arr.length - 1 - i;
+            j++
+        ) {
+
+            result.push(
+
+                createStep(
+
+                    arr,
+
+                    `Compare ${arr[j]} and ${arr[j + 1]}.`,
+
+                    [j, j + 1],
+
+                    sorted
+
+                )
+
+            );
+
+
+            if (
+                arr[j] >
+                arr[j + 1]
+            ) {
+
+                [
+
+                    arr[j],
+
+                    arr[j + 1]
+
+                ] = [
+
+                    arr[j + 1],
+
+                    arr[j]
+
+                ];
+
+
+                result.push(
+
+                    createStep(
+
+                        arr,
+
+                        `Swap ${arr[j]} and ${arr[j + 1]}.`,
+
+                        [j, j + 1],
+
+                        sorted
+
+                    )
+
+                );
+
+            }
+
+        }
+
+
+        sorted.push(
+            arr.length - 1 - i
+        );
+
+
+        result.push(
+
+            createStep(
+
+                arr,
+
+                `The largest remaining element is now in its final position.`,
+
+                [],
+
+                sorted
+
+            )
+
+        );
+
+    }
+
+
+    return result;
+}
+
+
+/* ==========================================
+        SELECTION SORT
+========================================== */
+
+function selectionSortSteps() {
+
+    let arr =
+        [...originalArray];
+
+    let result = [];
+
+    let sorted = [];
+
+
+    result.push(
+
+        createStep(
+
+            arr,
+
+            "Selection Sort: find the smallest element and put it at the beginning."
+
+        )
+
+    );
+
+
+    for (
+        let i = 0;
+        i < arr.length - 1;
+        i++
+    ) {
+
+        let minIndex = i;
+
+
+        result.push(
+
+            createStep(
+
+                arr,
+
+                `Start searching for the minimum from index ${i}.`,
+
+                [i],
+
+                sorted
+
+            )
+
+        );
+
+
+        for (
+            let j = i + 1;
+            j < arr.length;
+            j++
+        ) {
+
+            result.push(
+
+                createStep(
+
+                    arr,
+
+                    `Compare ${arr[minIndex]} and ${arr[j]}.`,
+
+                    [minIndex, j],
+
+                    sorted
+
+                )
+
+            );
+
+
+            if (
+                arr[j] <
+                arr[minIndex]
+            ) {
+
+                minIndex = j;
+
+
+                result.push(
+
+                    createStep(
+
+                        arr,
+
+                        `${arr[minIndex]} is the new minimum.`,
+
+                        [minIndex],
+
+                        sorted
+
+                    )
+
+                );
+
+            }
+
+        }
+
+
+        [
+
+            arr[i],
+
+            arr[minIndex]
+
+        ] = [
+
+            arr[minIndex],
+
+            arr[i]
+
+        ];
+
+
+        sorted.push(i);
+
+
+        result.push(
+
+            createStep(
+
+                arr,
+
+                `Put ${arr[i]} in its final position.`,
+
+                [i],
+
+                sorted
+
+            )
+
+        );
+
+    }
+
+
+    sorted.push(
+        arr.length - 1
+    );
+
+
+    result.push(
+
+        createStep(
+
+            arr,
+
+            "Selection Sort finished!",
+
+            [],
+
+            sorted
+
+        )
+
+    );
+
+
+    return result;
+}
+
+
+/* ==========================================
+        INSERTION SORT
+========================================== */
+
+function insertionSortSteps() {
+
+    let arr =
+        [...originalArray];
+
+    let result = [];
+
+    let sorted = [0];
+
+
+    result.push(
+
+        createStep(
+
+            arr,
+
+            "Insertion Sort: the first element is considered sorted.",
+
+            [],
+
+            sorted
+
+        )
+
+    );
+
+
+    for (
+        let i = 1;
+        i < arr.length;
+        i++
+    ) {
+
+        let key =
+            arr[i];
+
+        let j =
+            i - 1;
+
+
+        result.push(
+
+            createStep(
+
+                arr,
+
+                `Take ${key} as the key and compare it with the sorted part.`,
+
+                [i],
+
+                sorted
+
+            )
+
+        );
+
+
+        while (
+            j >= 0 &&
+            arr[j] > key
+        ) {
+
+            /*
+                Shift the bigger element
+                one position to the right.
+            */
+
+            arr[j + 1] =
+                arr[j];
+
+
+            result.push(
+
+                createStep(
+
+                    arr,
+
+                    `${arr[j]} is bigger than ${key}, so move it one position to the right.`,
+
+                    [j + 1],
+
+                    sorted
+
+                )
+
+            );
+
+
+            j--;
+
+        }
+
+
+        /*
+            Put key in its correct position.
+        */
+
+        arr[j + 1] =
+            key;
+
+
+        result.push(
+
+            createStep(
+
+                arr,
+
+                `Insert ${key} into its correct position.`,
+
+                [j + 1],
+
+                sorted
+
+            )
+
+        );
+
+
+        sorted = [];
+
+
+        for (
+            let x = 0;
+            x <= i;
+            x++
+        ) {
+
+            sorted.push(x);
+
+        }
+
+
+        result.push(
+
+            createStep(
+
+                arr,
+
+                `The first ${i + 1} elements are now sorted.`,
+
+                [],
+
+                sorted
+
+            )
+
+        );
+
+    }
+
+
+    return result;
+}
+
+
+/* ==========================================
+        MERGE SORT
+        TREE VISUALIZATION
+========================================== */
+
+function mergeSortSteps() {
+
+    let arr =
+        [...originalArray];
+
+    let result = [];
+
+    let treeNodes = [];
+
+    let nodeId = 0;
+
+
+    /*
+        Create tree node
+    */
+
+    function createNode(
+        values,
+        left,
+        right,
+        level
+    ) {
+
+        let node = {
+
+            id: nodeId++,
+
+            values: [...values],
+
+            left: left,
+
+            right: right,
+
+            level: level
+
+        };
+
+
+        treeNodes.push(node);
+
+
+        return node;
+    }
+
+
+    /*
+        Build initial tree
+    */
+
+    function buildTree(
+        left,
+        right,
+        level = 0
+    ) {
+
+        let values =
+            originalArray.slice(
+                left,
+                right + 1
+            );
+
+
+        let node =
+            createNode(
+                values,
+                left,
+                right,
+                level
+            );
+
+
+        if (
+            left === right
+        ) {
+
+            return node;
+
+        }
+
+
+        let mid =
+            Math.floor(
+                (left + right) / 2
+            );
+
+
+        node.leftNode =
+            buildTree(
+                left,
+                mid,
+                level + 1
+            );
+
+
+        node.rightNode =
+            buildTree(
+                mid + 1,
+                right,
+                level + 1
+            );
+
+
+        return node;
+
+    }
+
+
+    buildTree(
+        0,
+        originalArray.length - 1
+    );
+
+
+    /*
+        Initial state
+    */
+
+    result.push({
+
+        type: "mergeTree",
+
+        nodes:
+            JSON.parse(
+                JSON.stringify(
+                    treeNodes
+                )
+            ),
+
+        active: [],
+
+        merged: false,
+
+        description:
+            "Merge Sort: start with the whole array and divide it into smaller subarrays."
+
+    });
+
+
+    /*
+        Update a node's values
+    */
+
+    function updateTreeNode(
+        left,
+        right
+    ) {
+
+        let node =
+            treeNodes.find(
+
+                n =>
+                    n.left === left &&
+                    n.right === right
+
+            );
+
+
+        if (node) {
+
+            node.values =
+                arr.slice(
+                    left,
+                    right + 1
+                );
+
+        }
+
+    }
+
+
+    /*
+        Merge Sort recursion
+    */
+
+    function mergeSort(
+        left,
+        right
+    ) {
+
+        /*
+            Base Case
+        */
+
+        if (
+            left >= right
+        ) {
+
+            return;
+
+        }
+
+
+        let mid =
+            Math.floor(
+                (left + right) / 2
+            );
+
+
+        /*
+            Show division
+        */
+
+        result.push({
+
+            type: "mergeTree",
+
+            nodes:
+                JSON.parse(
+                    JSON.stringify(
+                        treeNodes
+                    )
+                ),
+
+            active: [
+                left,
+                right
+            ],
+
+            merged: false,
+
+            description:
+                `Divide [${arr.slice(left, right + 1)}] into two parts. Mid = ${mid}.`
+
+        });
+
+
+        /*
+            Solve left
+        */
+
+        mergeSort(
+            left,
+            mid
+        );
+
+
+        /*
+            Solve right
+        */
+
+        mergeSort(
+            mid + 1,
+            right
+        );
+
+
+        /*
+            Prepare merging
+        */
+
+        let leftPart =
+            arr.slice(
+                left,
+                mid + 1
+            );
+
+
+        let rightPart =
+            arr.slice(
+                mid + 1,
+                right + 1
+            );
+
+
+        let i = 0;
+
+        let j = 0;
+
+        let k = left;
+
+
+        result.push({
+
+            type: "mergeTree",
+
+            nodes:
+                JSON.parse(
+                    JSON.stringify(
+                        treeNodes
+                    )
+                ),
+
+            active: [
+                left,
+                right
+            ],
+
+            merged: false,
+
+            description:
+                `Now merge [${leftPart}] and [${rightPart}].`
+
+        });
+
+
+        /*
+            Compare two parts
+        */
+
+        while (
+            i < leftPart.length &&
+            j < rightPart.length
+        ) {
+
+            if (
+                leftPart[i] <=
+                rightPart[j]
+            ) {
+
+                arr[k] =
+                    leftPart[i];
+
+                i++;
+
+            }
+
+            else {
+
+                arr[k] =
+                    rightPart[j];
+
+                j++;
+
+            }
+
+
+            k++;
+
+
+            updateTreeNode(
+                left,
+                right
+            );
+
+
+            result.push({
+
+                type: "mergeTree",
+
+                nodes:
+                    JSON.parse(
+                        JSON.stringify(
+                            treeNodes
+                        )
+                    ),
+
+                active: [
+                    left,
+                    right
+                ],
+
+                merged: false,
+
+                description:
+                    `Take the smaller element and place it into the merged array.`
+
+            });
+
+        }
+
+
+        /*
+            Remaining left elements
+        */
+
+        while (
+            i < leftPart.length
+        ) {
+
+            arr[k] =
+                leftPart[i];
+
+            i++;
+
+            k++;
+
+
+            updateTreeNode(
+                left,
+                right
+            );
+
+
+            result.push({
+
+                type: "mergeTree",
+
+                nodes:
+                    JSON.parse(
+                        JSON.stringify(
+                            treeNodes
+                        )
+                    ),
+
+                active: [
+                    left,
+                    right
+                ],
+
+                merged: false,
+
+                description:
+                    "Copy the remaining element from the left part."
+
+            });
+
+        }
+
+
+        /*
+            Remaining right elements
+        */
+
+        while (
+            j < rightPart.length
+        ) {
+
+            arr[k] =
+                rightPart[j];
+
+            j++;
+
+            k++;
+
+
+            updateTreeNode(
+                left,
+                right
+            );
+
+
+            result.push({
+
+                type: "mergeTree",
+
+                nodes:
+                    JSON.parse(
+                        JSON.stringify(
+                            treeNodes
+                        )
+                    ),
+
+                active: [
+                    left,
+                    right
+                ],
+
+                merged: false,
+
+                description:
+                    "Copy the remaining element from the right part."
+
+            });
+
+        }
+
+
+        /*
+            Merge finished
+        */
+
+        updateTreeNode(
+            left,
+            right
+        );
+
+
+        result.push({
+
+            type: "mergeTree",
+
+            nodes:
+                JSON.parse(
+                    JSON.stringify(
+                        treeNodes
+                    )
+                ),
+
+            active: [
+                left,
+                right
+            ],
+
+            merged: true,
+
+            description:
+                `Merge complete: [${arr.slice(left, right + 1)}]`
+
+        });
+
+    }
+
+
+    mergeSort(
+        0,
+        arr.length - 1
+    );
+
+
+    /*
+        Final state
+    */
+
+    result.push({
+
+        type: "mergeTree",
+
+        nodes:
+            JSON.parse(
+                JSON.stringify(
+                    treeNodes
+                )
+            ),
+
+        active: [],
+
+        merged: true,
+
+        description:
+            "Merge Sort finished! The whole array is sorted."
+
+    });
+
+
+    return result;
+}
+
+
+/* ==========================================
+        QUICK SORT - LOMUTO
+========================================== */
+
+function quickSortLomutoSteps() {
+
+    let arr =
+        [...originalArray];
+
+    let result = [];
+
+
+    result.push(
+
+        createStep(
+
+            arr,
+
+            "Quick Sort - Lomuto: choose the last element as the pivot."
+
+        )
+
+    );
+
+
+    function partition(
+        low,
+        high
+    ) {
+
+        let pivot =
+            arr[high];
+
+        let i =
+            low - 1;
+
+
+        result.push(
+
+            createStep(
+
+                arr,
+
+                `Pivot = ${pivot}. Pointer j scans the array.`,
+
+                [],
+
+                [],
+
+                [high]
+
+            )
+
+        );
+
+
+        for (
+            let j = low;
+            j < high;
+            j++
+        ) {
+
+            result.push(
+
+                createStep(
+
+                    arr,
+
+                    `Compare ${arr[j]} with pivot ${pivot}.`,
+
+                    [j],
+
+                    [],
+
+                    [high]
+
+                )
+
+            );
+
+
+            if (
+                arr[j] < pivot
+            ) {
+
+                i++;
+
+
+                [
+
+                    arr[i],
+
+                    arr[j]
+
+                ] = [
+
+                    arr[j],
+
+                    arr[i]
+
+                ];
+
+
+                result.push(
+
+                    createStep(
+
+                        arr,
+
+                        `${arr[i]} is smaller than pivot → swap.`,
+
+                        [i, j],
+
+                        [],
+
+                        [high]
+
+                    )
+
+                );
+
+            }
+
+        }
+
+
+        [
+
+            arr[i + 1],
+
+            arr[high]
+
+        ] = [
+
+            arr[high],
+
+            arr[i + 1]
+
+        ];
+
+
+        result.push(
+
+            createStep(
+
+                arr,
+
+                `Put pivot ${pivot} in its final position.`,
+
+                [i + 1],
+
+                [],
+
+                [i + 1]
+
+            )
+
+        );
+
+
+        return i + 1;
+
+    }
+
+
+    function quickSort(
+        low,
+        high
+    ) {
+
+        if (
+            low >= high
+        ) {
+
+            return;
+
+        }
+
+
+        let pivotIndex =
+            partition(
+                low,
+                high
+            );
+
+
+        quickSort(
+            low,
+            pivotIndex - 1
+        );
+
+
+        quickSort(
+            pivotIndex + 1,
+            high
+        );
+
+    }
+
+
+    quickSort(
+        0,
+        arr.length - 1
+    );
+
+
+    result.push(
+
+        createStep(
+
+            arr,
+
+            "Quick Sort - Lomuto finished!"
+
+        )
+
+    );
+
+
+    return result;
+}
+
+
+/* ==========================================
+        QUICK SORT - TWO POINTERS / HOARE
+========================================== */
+
+function quickSortHoareSteps() {
+
+    let arr =
+        [...originalArray];
+
+    let result = [];
+
+
+    result.push(
+
+        createStep(
+
+            arr,
+
+            "Quick Sort - Two Pointers: Left starts from the beginning and Right starts from the end."
+
+        )
+
+    );
+
+
+    function partition(
+        low,
+        high
+    ) {
+
+        let pivot =
+            arr[
+                Math.floor(
+                    (low + high) / 2
+                )
+            ];
+
+
+        let pivotIndex =
+            Math.floor(
+                (low + high) / 2
+            );
+
+
+        let left =
+            low;
+
+        let right =
+            high;
+
+
+        result.push(
+
+            createStep(
+
+                arr,
+
+                `Pivot = ${pivot}. Left moves right and Right moves left.`,
+
+                [left, right],
+
+                [],
+
+                [pivotIndex]
+
+            )
+
+        );
+
+
+        while (
+            left <= right
+        ) {
+
+
+            /*
+                Move Left
+            */
+
+            while (
+                arr[left] <
+                pivot
+            ) {
+
+                result.push(
+
+                    createStep(
+
+                        arr,
+
+                        `${arr[left]} < ${pivot} → Left moves right.`,
+
+                        [left],
+
+                        [],
+
+                        [pivotIndex]
+
+                    )
+
+                );
+
+
+                left++;
+
+            }
+
+
+            /*
+                Move Right
+            */
+
+            while (
+                arr[right] >
+                pivot
+            ) {
+
+                result.push(
+
+                    createStep(
+
+                        arr,
+
+                        `${arr[right]} > ${pivot} → Right moves left.`,
+
+                        [right],
+
+                        [],
+
+                        [pivotIndex]
+
+                    )
+
+                );
+
+
+                right--;
+
+            }
+
+
+            /*
+                Swap
+            */
+
+            if (
+                left <= right
+            ) {
+
+                result.push(
+
+                    createStep(
+
+                        arr,
+
+                        `Left and Right found elements on the wrong sides → swap them.`,
+
+                        [left, right],
+
+                        [],
+
+                        [pivotIndex]
+
+                    )
+
+                );
+
+
+                [
+
+                    arr[left],
+
+                    arr[right]
+
+                ] = [
+
+                    arr[right],
+
+                    arr[left]
+
+                ];
+
+
+                left++;
+
+                right--;
+
+            }
+
+        }
+
+
+        return left;
+
+    }
+
+
+    function quickSort(
+        low,
+        high
+    ) {
+
+        if (
+            low >= high
+        ) {
+
+            return;
+
+        }
+
+
+        let index =
+            partition(
+                low,
+                high
+            );
+
+
+        quickSort(
+            low,
+            index - 1
+        );
+
+
+        quickSort(
+            index,
+            high
+        );
+
+    }
+
+
+    quickSort(
+        0,
+        arr.length - 1
+    );
+
+
+    result.push(
+
+        createStep(
+
+            arr,
+
+            "Quick Sort - Two Pointers finished!"
+
+        )
+
+    );
+
+
+    return result;
+}
+
+
+/* ==========================================
+        GENERATE STEPS
+========================================== */
+
+function generateSteps() {
+
+    let algorithm =
+        document.getElementById(
+            "algorithm"
+        ).value;
+
+
+    switch (
+        algorithm
+    ) {
+
+        case "bubble":
+
+            return bubbleSortSteps();
+
+
+        case "selection":
+
+            return selectionSortSteps();
+
+
+        case "insertion":
+
+            return insertionSortSteps();
+
+
+        case "merge":
+
+            return mergeSortSteps();
+
+
+        case "lomuto":
+
+            return quickSortLomutoSteps();
+
+
+        case "hoare":
+
+            return quickSortHoareSteps();
+
+    }
+
+}
+
+
+/* ==========================================
+        RENDER NORMAL ARRAY
+========================================== */
+
+function renderArray(state) {
+
+    let arrayContainer =
+        document.getElementById(
+            "array"
+        );
+
+
+    arrayContainer.innerHTML =
+        "";
+
+
+    arrayContainer.className =
+        "array";
+
+
+    state.array.forEach(
+        (value, index) => {
+
+            let item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "item";
+
+
+            let bar =
+                document.createElement(
+                    "div"
+                );
+
+
+            bar.className =
+                "bar normal";
+
+
+            /*
+                Bar height
+            */
+
+            bar.style.height =
+                (
+                    value * 35 + 40
+                ) + "px";
+
+
+            /*
+                Sorted
+            */
+
+            if (
+                state.sorted.includes(
+                    index
+                )
+            ) {
+
+                bar.className =
+                    "bar sorted";
+
+            }
+
+
+            /*
+                Compare
+            */
+
+            if (
+                state.highlighted.includes(
+                    index
+                )
+            ) {
+
+                bar.className =
+                    "bar compare";
+
+            }
+
+
+            /*
+                Pivot
+            */
+
+            if (
+                state.pivot.includes(
+                    index
+                )
+            ) {
+
+                bar.className =
+                    "bar pivot";
+
+            }
+
+
+            bar.textContent =
+                value;
+
+
+            let indexText =
+                document.createElement(
+                    "div"
+                );
+
+
+            indexText.className =
+                "index";
+
+
+            indexText.textContent =
+                `index ${index}`;
+
+
+            item.appendChild(
+                bar
+            );
+
+
+            item.appendChild(
+                indexText
+            );
+
+
+            arrayContainer.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+        RENDER MERGE TREE
+========================================== */
+
+function renderMergeTree(state) {
+
+    let container =
+        document.getElementById(
+            "array"
+        );
+
+
+    container.innerHTML =
+        "";
+
+
+    container.className =
+        "merge-tree";
+
+
+    /*
+        Group nodes according to level
+    */
+
+    let levels = {};
+
+
+    state.nodes.forEach(
+        node => {
+
+            if (
+                !levels[node.level]
+            ) {
+
+                levels[node.level] =
+                    [];
+
+            }
+
+
+            levels[node.level]
+                .push(node);
+
+        }
+    );
+
+
+    /*
+        Display levels
+    */
+
+    Object.keys(levels)
+        .sort(
+            (a, b) =>
+                Number(a) -
+                Number(b)
+        )
+        .forEach(
+            level => {
+
+                let row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "tree-row";
+
+
+                levels[level]
+                    .forEach(
+                        node => {
+
+                            let box =
+                                document.createElement(
+                                    "div"
+                                );
+
+
+                            box.className =
+                                "tree-node";
+
+
+                            /*
+                                Active node
+                            */
+
+                            if (
+                                state.active &&
+                                state.active[0] ===
+                                    node.left &&
+                                state.active[1] ===
+                                    node.right
+                            ) {
+
+                                box.classList.add(
+                                    "active-node"
+                                );
+
+                            }
+
+
+                            /*
+                                Merged
+                            */
+
+                            if (
+                                state.merged &&
+                                node.values.length >
+                                    1
+                            ) {
+
+                                box.classList.add(
+                                    "merged-node"
+                                );
+
+                            }
+
+
+                            box.innerHTML = `
+
+                                <div class="node-values">
+
+                                    [${node.values.join(" ")}]
+
+                                </div>
+
+
+                                <div class="node-range">
+
+                                    index
+                                    ${node.left}
+                                    -
+                                    ${node.right}
+
+                                </div>
+
+                            `;
+
+
+                            row.appendChild(
+                                box
+                            );
+
+                        }
+                    );
+
+
+                container.appendChild(
+                    row
+                );
+
+            }
+        );
+
+}
+
+
+/* ==========================================
+        RENDER
+========================================== */
+
+function render() {
+
+    let state =
+        steps[currentStep];
+
+
+    /*
+        Merge Sort
+        uses Tree
+    */
+
+    if (
+        state.type ===
+        "mergeTree"
+    ) {
+
+        renderMergeTree(
+            state
+        );
+
+    }
+
+    else {
+
+        renderArray(
+            state
+        );
+
+    }
+
+
+    /*
+        Description
+    */
+
+    document.getElementById(
+        "description"
+    ).textContent =
+        state.description;
+
+
+    /*
+        Step counter
+    */
+
+    document.getElementById(
+        "stepNumber"
+    ).textContent =
+        currentStep + 1;
+
+
+    document.getElementById(
+        "totalSteps"
+    ).textContent =
+        steps.length;
+
+
+    /*
+        Disable buttons
+    */
+
+    document.getElementById(
+        "previous"
+    ).disabled =
+        currentStep === 0;
+
+
+    document.getElementById(
+        "next"
+    ).disabled =
+        currentStep ===
+        steps.length - 1;
+
+}
+
+
+/* ==========================================
+        RESET
+========================================== */
+
+function reset() {
+
+    steps =
+        generateSteps();
+
+
+    currentStep =
+        0;
+
+
+    render();
+
+}
+
+
+/* ==========================================
+        NEXT
+========================================== */
+
+document.getElementById(
+    "next"
+).addEventListener(
+    "click",
+    function () {
+
+        if (
+            currentStep <
+            steps.length - 1
+        ) {
+
+            currentStep++;
+
+            render();
+
+        }
+
+    }
+);
+
+
+/* ==========================================
+        PREVIOUS
+========================================== */
+
+document.getElementById(
+    "previous"
+).addEventListener(
+    "click",
+    function () {
+
+        if (
+            currentStep > 0
+        ) {
+
+            currentStep--;
+
+            render();
+
+        }
+
+    }
+);
+
+
+/* ==========================================
+        RESET BUTTON
+========================================== */
+
+document.getElementById(
+    "reset"
+).addEventListener(
+    "click",
+    reset
+);
+
+
+/* ==========================================
+        CHANGE ALGORITHM
+========================================== */
+
+document.getElementById(
+    "algorithm"
+).addEventListener(
+    "change",
+    reset
+);
+
+
+/* ==========================================
+        KEYBOARD ARROWS
+========================================== */
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key ===
+            "ArrowRight"
+        ) {
+
+            document
+                .getElementById(
+                    "next"
+                )
+                .click();
+
+        }
+
+
+        if (
+            event.key ===
+            "ArrowLeft"
+        ) {
+
+            document
+                .getElementById(
+                    "previous"
+                )
+                .click();
+
+        }
+
+    }
+);
+
+
+/* ==========================================
+        START
+========================================== */
+
+reset();
+
+</script>
+
+</body>
+
+</html>
