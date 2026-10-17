@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linked List Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FFFDF7;
+  --paper: #FFF9EC;
+  --beige: #FFF1D6;
+  --terracotta: #FF8A65;
+  --terracotta-dark: #F4511E;
+  --terracotta-ink: #B0350B;
+  --mint: #4DD0A7;
+  --mint-dark: #16A87D;
+  --mint-ink: #0B6E52;
+  --sun: #FFC93C;
+  --sun-dark: #F2A900;
+  --sky: #4FB0E5;
+  --sky-dark: #2E93CC;
+  --sky-ink: #1D6A9A;
+  --slate: #3D405B;
+  --slate-soft: #8B8AA8;
+  --line: #FFD98A;
+  --card-shadow: 3px 5px 0 rgba(61,64,91,0.10);
+  --card-shadow-hover: 4px 7px 0 rgba(61,64,91,0.14);
+  --radius: 20px;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); background: var(--cream); }
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 0;
+  background: var(--cream);
+  background-image: radial-gradient(circle at 1px 1px, rgba(244,81,30,0.12) 1.5px, transparent 0);
+  background-size: 20px 20px;
+  color: var(--slate);
+  font-family: 'Fredoka', sans-serif;
+  min-height: 100vh;
+}
+h1, h2, h3 { font-family: 'Fredoka', sans-serif; font-weight: 600; margin: 0; }
+code, .mono { font-family: 'Fira Code', monospace; }
+
+.wrap { max-width: 1040px; margin: 0 auto; padding: 26px 20px 44px; }
+
+header.top { margin-bottom: 20px; text-align: center; }
+header.top h1 {
+  font-family: 'Caveat', cursive; font-weight: 700; font-size: 44px;
+  color: var(--terracotta-dark); transform: rotate(-1.5deg); display: inline-block;
+  text-shadow: 2px 2px 0 var(--sun);
+}
+header.top .sub { font-size: 13.5px; color: var(--slate-soft); margin: 4px auto 0; max-width: 680px; line-height: 1.45; }
+
+/* --- Toolbar strip --- */
+.toolbar-panel {
+  background: var(--beige);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 9px;
+  border: 3px solid var(--line);
+}
+.toolbar-label {
+  font-family: 'Caveat', cursive; font-weight: 700; font-size: 20px;
+  color: var(--terracotta-dark); margin-right: 4px; white-space: nowrap;
+}
+.tb-group { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+button {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 500;
+  font-size: 13.5px;
+  border: 2.5px solid var(--slate);
+  border-radius: 13px;
+  padding: 9px 13px;
+  cursor: pointer;
+  background: #fff;
+  color: var(--slate);
+  box-shadow: 2px 3px 0 var(--slate);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+button:hover { transform: translate(-1px,-1px); box-shadow: 3px 4px 0 var(--slate); }
+button:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--slate); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+button.primary { background: var(--terracotta); color: #fff; border-color: var(--terracotta-ink); box-shadow: 2px 3px 0 var(--terracotta-ink); }
+button.primary:hover { background: #FF7043; box-shadow: 3px 4px 0 var(--terracotta-ink); }
+button.mint { background: var(--mint); color: #fff; border-color: var(--mint-ink); box-shadow: 2px 3px 0 var(--mint-ink); }
+button.mint:hover { background: #3FC79A; box-shadow: 3px 4px 0 var(--mint-ink); }
+button.sun { background: var(--sun); color: var(--terracotta-ink); border-color: var(--sun-dark); box-shadow: 2px 3px 0 var(--sun-dark); }
+button.sun:hover { background: #FFD65C; box-shadow: 3px 4px 0 var(--sun-dark); }
+button.ghost { background: #fff; }
+button.seg.on { background: var(--terracotta); color: #fff; border-color: var(--terracotta-ink); box-shadow: 2px 3px 0 var(--terracotta-ink); }
+button:disabled { opacity: 0.4; cursor: default; transform: none !important; }
+
+.toolbar-panel input {
+  width: 96px; padding: 9px 11px; border-radius: 12px;
+  border: 2.5px solid var(--line); font-family: 'Fira Code', monospace; font-size: 13px;
+  background: var(--paper); color: var(--slate);
+}
+.toolbar-panel input.narrow { width: 108px; }
+.toolbar-panel input:focus { outline: none; border-color: var(--sky); }
+
+/* --- Canvas --- */
+.canvas-panel {
+  position: relative;
+  padding: 18px 22px 16px;
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  border: 3px solid var(--line);
+  overflow: hidden;
+}
+.zone-label {
+  font-family: 'Caveat', cursive; font-weight: 700; font-size: 22px;
+  color: var(--mint-ink); margin-bottom: 2px; display: inline-block;
+  position: relative; z-index: 2;
+}
+.stage-scroll {
+  position: relative; overflow-x: auto; overflow-y: hidden;
+  margin: 0 -10px; padding: 0 10px 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.stage { position: relative; min-width: 100%; height: 374px; }
+.divider {
+  position: absolute; left: 0; right: 0; top: 308px; margin: 0;
+  border: none; border-top: 3px dashed var(--sun-dark); opacity: 0.55;
+}
+.divider::after {
+  content: "\2702"; position: absolute; left: 150px; top: -12px;
+  transform: rotate(8deg); font-size: 16px; color: var(--sun-dark);
+  background: var(--paper); padding: 0 8px;
+}
+.ptr-zone-label {
+  position: absolute; left: 6px; top: 311px;
+  font-family: 'Caveat', cursive; font-weight: 700; font-size: 20px; line-height: 18px;
+  color: var(--terracotta-ink);
+}
+.empty-hint {
+  position: absolute; left: 44px; top: 96px;
+  color: var(--slate-soft); font-family: 'Caveat', cursive; font-size: 21px;
+}
+svg.layer { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+svg.arrows { z-index: 1; }
+svg.labels { z-index: 6; }
+
+/* --- list nodes --- */
+.node {
+  position: absolute; z-index: 2; height: 78px;
+  background: #F1FDF8; border: 3px solid var(--mint); border-radius: 16px;
+  padding: 5px; box-shadow: var(--card-shadow);
+  transition: left 0.55s cubic-bezier(.3,.7,.3,1), top 0.55s cubic-bezier(.3,.7,.3,1), opacity 0.4s ease, box-shadow 0.25s ease, background 0.3s ease;
+}
+.node.fresh { animation: pop 0.5s ease; }
+.node.active { box-shadow: 0 0 0 5px rgba(255,138,101,0.35), var(--card-shadow-hover); }
+.node.staged { border-color: var(--sun-dark); background: #FFFBEA; }
+.node.freed { border-style: dashed; border-color: var(--slate-soft); background: #F4F2EA; opacity: 0.6; }
+.node .addr { font-family: 'Fira Code', monospace; font-size: 11px; line-height: 14px; font-weight: 500; color: var(--mint-ink); margin-bottom: 4px; white-space: nowrap; }
+.node.freed .addr { color: var(--terracotta-ink); }
+.node .cells { display: flex; gap: 3px; height: 44px; }
+.cell { position: relative; height: 44px; border-radius: 9px; background: #fff; border: 2px solid #CFEFE3; }
+.pcell { flex: 1 1 0; min-width: 0; }
+.vcell { flex: 0 0 50px; background: #FFF4CF; border-color: var(--sun); }
+.cell .lbl { position: absolute; top: 1px; font-size: 9.5px; line-height: 12px; color: var(--slate-soft); }
+.cell .pv { position: absolute; top: 14px; font-family: 'Fira Code', monospace; font-weight: 500; font-size: 11px; line-height: 14px; color: var(--slate); white-space: nowrap; }
+.cell .pv.null { color: var(--slate-soft); }
+.pcell.next .lbl, .pcell.next .pv { left: 5px; }
+.pcell.prev .lbl, .pcell.prev .pv { right: 5px; text-align: right; }
+.pcell.next .lbl { color: var(--mint-ink); }
+.pcell.prev .lbl { color: var(--sky-ink); }
+.vcell .lbl { left: 0; right: 0; text-align: center; color: var(--terracotta-ink); }
+.vcell b { position: absolute; top: 13px; left: 0; right: 0; text-align: center; font-family: 'Fira Code', monospace; font-weight: 600; font-size: 16px; line-height: 22px; color: var(--slate); }
+.dot { position: absolute; display: block; width: 10px; height: 10px; border-radius: 50%; background: var(--mint-dark); }
+.pcell.next .dot { right: 5px; top: 4px; }
+.pcell.prev .dot { left: 5px; top: 27px; background: var(--sky-dark); }
+.dot.null { background: transparent; border: 2px solid var(--slate-soft); }
+.pcell.hl { background: #FFF0B8; border-color: var(--sun-dark); animation: pop 0.5s ease; }
+
+/* --- pointer tags --- */
+.ptr-tag {
+  position: absolute; z-index: 3; height: 30px; padding: 0; text-align: center;
+  border-radius: 12px; border: 3px solid var(--terracotta); background: #FFF3EC; color: var(--terracotta-ink);
+  font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 14px; line-height: 24px; white-space: nowrap;
+  box-shadow: var(--card-shadow);
+  transition: left 0.55s cubic-bezier(.3,.7,.3,1), top 0.55s cubic-bezier(.3,.7,.3,1);
+}
+.ptr-tag.main { background: var(--terracotta); color: #fff; border-color: var(--terracotta-ink); }
+.ptr-tag.fresh { animation: pop 0.5s ease; }
+.null-chip {
+  position: absolute; z-index: 2; width: 76px; height: 34px; display: none;
+  border: 2.5px dashed var(--slate-soft); border-radius: 12px; background: #fff; color: var(--slate-soft);
+  font-family: 'Fira Code', monospace; font-weight: 500; font-size: 12px; line-height: 29px; text-align: center;
+  transition: left 0.55s cubic-bezier(.3,.7,.3,1);
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* --- legend --- */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font-size: 12px; color: var(--slate-soft); align-items: center; }
+.legend .lg { display: inline-flex; align-items: center; gap: 7px; }
+.sw { display: inline-block; width: 28px; height: 0; border-top: 3.5px solid; border-radius: 2px; }
+.sw.next { border-color: #16A87D; }
+.sw.prev { border-color: #2E93CC; }
+.sw.ptr { border-color: #E07A5F; }
+.sw.new { border-color: #16A87D; box-shadow: 0 0 0 4px rgba(255,201,60,0.6); }
+.sw.old { border-top-style: dashed; border-color: #F4511E; opacity: 0.7; }
+
+.toast {
+  position: absolute;
+  bottom: 16px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--sun);
+  color: var(--terracotta-ink);
+  padding: 10px 16px;
+  border-radius: 13px;
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: var(--card-shadow);
+  border: 2.5px solid var(--sun-dark);
+  opacity: 0;
+  z-index: 10;
+  transition: all 0.25s ease;
+  max-width: 90%;
+  text-align: center;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* --- step panel --- */
+.step-panel {
+  margin-top: 18px;
+  background: var(--beige);
+  border: 3px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 14px 18px;
+  display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; justify-content: space-between;
+}
+.step-main { flex: 1 1 380px; min-width: 0; }
+.step-badge { font-family: 'Caveat', cursive; font-weight: 700; font-size: 21px; color: var(--terracotta-dark); line-height: 1.1; }
+.step-text { font-size: 14.5px; line-height: 1.45; margin-top: 3px; }
+.step-code {
+  display: inline-block; margin-top: 8px;
+  background: var(--slate); color: var(--cream);
+  font-family: 'Fira Code', monospace; font-size: 13px;
+  padding: 6px 12px; border-radius: 12px; max-width: 100%; overflow-wrap: anywhere;
+}
+.step-code:empty { display: none; }
+.step-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .node, .ptr-tag, .null-chip { transition: none; }
+  .node.fresh, .ptr-tag.fresh, .pcell.hl { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Linked List Playground</h1>
+  </header>
+
+  <div class="toolbar-panel">
+    <div class="tb-group">
+      <span class="toolbar-label">type:</span>
+      <button class="seg on" id="modeSingly" type="button">singly</button>
+      <button class="seg" id="modeDoubly" type="button">doubly</button>
+    </div>
+    <div class="tb-group">
+      <span class="toolbar-label" style="margin-left:6px;">input:</span>
+      <input id="valInput" placeholder="value" maxlength="4" autocomplete="off" aria-label="Value">
+      <input id="idxInput" class="narrow" placeholder="index" maxlength="3" inputmode="numeric" autocomplete="off" aria-label="Index">
+    </div>
+    <div class="tb-group">
+      <span class="toolbar-label" style="margin-left:6px;">do:</span>
+      <button id="insertBtn" class="mint" type="button"><i>&#43;</i> insert</button>
+      <button id="deleteBtn" class="sun" type="button"><i>&#215;</i> delete</button>
+      <button id="reverseBtn" class="primary" type="button"><i>&#8646;</i> reverse</button>
+    </div>
+  </div>
+
+  <div class="canvas-panel" id="canvasPanel">
+    <div class="zone-label" id="zoneLabel">singly linked list</div>
+    <div class="stage-scroll" id="scrollBox">
+      <div class="stage" id="stage">
+        <svg class="layer arrows" id="arrowSvg"><defs><marker id="mk-next" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="12" refX="11" refY="5" orient="auto"><path d="M0,0 L11,5 L0,10 Z" fill="#16A87D"></path></marker><marker id="mk-prev" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="12" refX="11" refY="5" orient="auto"><path d="M0,0 L11,5 L0,10 Z" fill="#2E93CC"></path></marker><marker id="mk-old" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="12" refX="11" refY="5" orient="auto"><path d="M0,0 L11,5 L0,10 Z" fill="#F4511E"></path></marker><marker id="mk-ptr" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 Z" fill="#E07A5F"></path></marker></defs><g id="arrowLayer"></g></svg>
+        <svg class="layer labels" id="labelSvg"><g id="labelLayer"></g></svg>
+        <hr class="divider">
+        <div class="ptr-zone-label">pointers</div>
+        <div class="empty-hint" id="emptyHint">the list is empty ~ insert a value to begin</div>
+        <div class="null-chip" id="nullChip">NULL</div>
+      </div>
+    </div>
+    <div class="legend" id="legend">
+      <span class="lg"><i class="sw next"></i>next link</span>
+      <span class="lg" id="lgPrev" style="display:none;"><i class="sw prev"></i>prev link</span>
+      <span class="lg"><i class="sw new"></i>link just written</span>
+      <span class="lg"><i class="sw old"></i>link cut</span>
+      <span class="lg"><i class="sw ptr"></i>pointer variable</span>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <div class="step-panel">
+    <div class="step-main" aria-live="polite">
+      <div class="step-badge" id="stepBadge">ready</div>
+      <div class="step-text" id="stepText"></div>
+      <code class="step-code" id="stepCode"></code>
+    </div>
+    <div class="step-actions">
+      <button id="prevBtn" class="ghost" type="button">&#9664; prev</button>
+      <button id="nextBtn" class="mint" type="button">next &#9654;</button>
+      <button id="finishBtn" class="sun" type="button">finish &#8677;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= constants ================= */
+const NS = 'http://www.w3.org/2000/svg';
+const GAP = 78, PADX = 40, TAG_H = 30, TAG_ARROW = 38;
+const STAGE_TOP = 84, ROW_TOP = 208, TAG_TOP = 330;
+const MAX_NODES = 10;
+const COL = { next:'#16A87D', prev:'#2E93CC', ptr:'#E07A5F', old:'#F4511E', stub:'#8B8AA8', glow:'rgba(255,201,60,0.65)' };
+
+const $ = id => document.getElementById(id);
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+/* ================= data model ================= */
+let seq = 0;
+function newNode(val){
+  seq++;
+  return { id: 'n' + seq, val: String(val), addr: '0x' + (0x1000 + seq * 0x20).toString(16) };
+}
+function makeList(vals, doubly){
+  const L = { nodes:{}, head:null, tail:null };
+  let last = null;
+  vals.forEach(v => {
+    const n = newNode(v);
+    n.next = null; n.prev = null;
+    L.nodes[n.id] = n;
+    if (last){ last.next = n.id; if (doubly) n.prev = last.id; } else { L.head = n.id; }
+    last = n;
+  });
+  L.tail = doubly && last ? last.id : null;
+  return L;
+}
+function orderOf(nodes, head){
+  const out = []; let c = head, guard = 0;
+  while (c && nodes[c] && guard++ < 200){ out.push(c); c = nodes[c].next; }
+  return out;
+}
+
+const M = {
+  singly: { doubly:false, nw:127, list:makeList(['10','20','30'], false), steps:[], idx:0 },
+  doubly: { doubly:true,  nw:188, list:makeList(['10','20','30'], true),  steps:[], idx:0 }
+};
+let mode = 'singly';
+
+/* ================= step builder ================= */
+function Builder(list, doubly){
+  this.doubly = doubly;
+  this.nodes = {};
+  Object.keys(list.nodes).forEach(id => {
+    const n = list.nodes[id];
+    this.nodes[id] = { id:n.id, val:n.val, addr:n.addr, next:n.next, prev:n.prev, slot:0, lane:'row', freed:false };
+  });
+  this.ptrs = [{ name:'head', target:list.head, main:true }];
+  if (doubly) this.ptrs.push({ name:'tail', target:list.tail, main:true });
+  this.hole = null; this.newL = []; this.oldL = []; this.steps = [];
+  this.place(orderOf(this.nodes, list.head), null);
+}
+Builder.prototype.place = function(order, hole){
+  this.hole = hole;
+  order.forEach((id, i) => {
+    const n = this.nodes[id];
+    n.slot = (hole !== null && i >= hole) ? i + 1 : i;
+    n.lane = 'row';
+  });
+};
+Builder.prototype.ptr = function(name){
+  const p = this.ptrs.find(p => p.name === name);
+  return p ? p.target : undefined;
+};
+Builder.prototype.setPtr = function(name, target){
+  const p = this.ptrs.find(p => p.name === name);
+  if (p) p.target = target; else this.ptrs.push({ name, target, main:false });
+};
+Builder.prototype.dropTemps = function(){ this.ptrs = this.ptrs.filter(p => p.main); };
+Builder.prototype.order = function(){ return orderOf(this.nodes, this.ptr('head')); };
+Builder.prototype.link = function(id, field, to){
+  const n = this.nodes[id];
+  const old = n[field];
+  if (old && old !== to) this.oldL.push({ from:id, field, to:old });
+  n[field] = to;
+  this.newL.push({ from:id, field, to });
+};
+Builder.prototype.create = function(val, slot){
+  const n = newNode(val);
+  this.nodes[n.id] = { id:n.id, val:n.val, addr:n.addr, next:null, prev:null, slot, lane:'stage', freed:false };
+  return n.id;
+};
+Builder.prototype.snap = function(text, code, active){
+  this.steps.push({
+    nodes: Object.keys(this.nodes).map(id => Object.assign({}, this.nodes[id])),
+    ptrs: this.ptrs.map(p => Object.assign({}, p)),
+    hole: this.hole, newL: this.newL, oldL: this.oldL,
+    active: (active || []).filter(Boolean),
+    text: text, code: code || ''
+  });
+  this.newL = []; this.oldL = [];
+};
+function finish(b){
+  Object.keys(b.nodes).forEach(id => { if (b.nodes[id].freed) delete b.nodes[id]; });
+  b.dropTemps();
+  const order = b.order();
+  b.place(order, null);
+  const arrow = b.doubly ? ' \u21C4 ' : ' \u2192 ';
+  b.snap('Done. The temporary pointers are released and the list is redrawn in order.',
+    order.length ? order.map(id => b.nodes[id].val).join(arrow) : 'empty list', []);
+  return b;
+}
+function finalList(b){
+  const nodes = {};
+  Object.keys(b.nodes).forEach(id => {
+    const n = b.nodes[id];
+    nodes[id] = { id:n.id, val:n.val, addr:n.addr, next:n.next, prev:n.prev };
+  });
+  return { nodes, head:b.ptr('head'), tail: b.doubly ? b.ptr('tail') : null };
+}
+
+/* ---------- insert ---------- */
+function opInsert(list, doubly, val, k){
+  const b = new Builder(list, doubly);
+  const order0 = b.order();
+  const n = order0.length;
+  const A = id => b.nodes[id].addr;
+
+  b.snap('Insert ' + val + ' at index ' + k + (k === n ? ' (the end of the list).' : '.') + (n ? '' : ' The list is empty, so head is null.'),
+    'insert(' + val + ', ' + k + ')');
+
+  let curr = null;
+  const walk = k > 0 && (doubly ? k < n : true);
+  if (walk){
+    curr = order0[0];
+    b.setPtr('curr', curr);
+    b.snap(k === 1
+      ? 'curr = head: index 0 is the node just before position 1, so the walk ends here.'
+      : 'curr = head: start walking from index 0. We need the node at index ' + (k - 1) + '.',
+      'curr = head', [curr]);
+    for (let i = 1; i <= k - 1; i++){
+      curr = b.nodes[curr].next;
+      b.setPtr('curr', curr);
+      b.snap('curr = curr.next: move to index ' + i + (i === k - 1 ? ', the node just before position ' + k + '.' : '.'),
+        'curr = curr.next', [curr]);
+    }
+  }
+
+  const nid = b.create(val, k);
+  b.place(order0, k);
+  b.setPtr('newNode', nid);
+  b.snap('Allocate a new node holding ' + val + ' at ' + A(nid) + '. Its links start out as null.',
+    'newNode = new Node(' + val + ')', [nid]);
+
+  if (!doubly){
+    if (k === 0){
+      if (n > 0){
+        const h = b.ptr('head');
+        b.link(nid, 'next', h);
+        b.snap('newNode.next = head: copy the address held by head (' + A(h) + ') so the new node points at the old first node.',
+          'newNode.next = head', [nid]);
+      }
+      b.setPtr('head', nid);
+      b.snap(n ? 'head = newNode: head now points at the new node, which is the new first node.'
+               : 'head = newNode: the list was empty, so the new node is now the only node.',
+        'head = newNode', [nid]);
+    } else {
+      const after = b.nodes[curr].next;
+      b.link(nid, 'next', after);
+      b.snap(after
+        ? 'newNode.next = curr.next: the new node copies the address of the old successor (' + A(after) + ').'
+        : 'curr.next is null, so newNode.next = null: the new node will be the last node.',
+        'newNode.next = curr.next', [nid]);
+      b.link(curr, 'next', nid);
+      b.snap('curr.next = newNode: the node before now points at the new node. The old link is cut and the chain is rejoined through the new node.',
+        'curr.next = newNode', [curr, nid]);
+    }
+  } else {
+    if (n === 0){
+      b.setPtr('head', nid);
+      b.snap('head = newNode: the list was empty, so head points at the new node.', 'head = newNode', [nid]);
+      b.setPtr('tail', nid);
+      b.snap('tail = newNode: it is also the last node, so tail points at it too.', 'tail = newNode', [nid]);
+    } else if (k === 0){
+      const h = b.ptr('head');
+      b.link(nid, 'next', h);
+      b.snap('newNode.next = head: the new node points forward at the old first node (' + A(h) + ').', 'newNode.next = head', [nid]);
+      b.link(h, 'prev', nid);
+      b.snap('head.prev = newNode: the old first node points back at the new node.', 'head.prev = newNode', [h, nid]);
+      b.setPtr('head', nid);
+      b.snap('head = newNode: head moves to the new node. Its prev stays null.', 'head = newNode', [nid]);
+    } else if (k === n){
+      const t = b.ptr('tail');
+      b.link(nid, 'prev', t);
+      b.snap('newNode.prev = tail: the new node points back at the old last node (' + A(t) + ').', 'newNode.prev = tail', [nid]);
+      b.link(t, 'next', nid);
+      b.snap('tail.next = newNode: the old last node points forward at the new node.', 'tail.next = newNode', [t, nid]);
+      b.setPtr('tail', nid);
+      b.snap('tail = newNode: tail moves to the new node. Its next stays null.', 'tail = newNode', [nid]);
+    } else {
+      const nx = b.nodes[curr].next;
+      b.setPtr('nxt', nx);
+      b.snap('nxt = curr.next: remember the node that will sit after the new one (' + A(nx) + ').', 'nxt = curr.next', [nx]);
+      b.link(nid, 'prev', curr);
+      b.snap('newNode.prev = curr: the new node points back at curr (' + A(curr) + ').', 'newNode.prev = curr', [nid]);
+      b.link(nid, 'next', nx);
+      b.snap('newNode.next = nxt: the new node points forward at nxt (' + A(nx) + ').', 'newNode.next = nxt', [nid]);
+      b.link(nx, 'prev', nid);
+      b.snap('nxt.prev = newNode: nxt points back at the new node instead of curr.', 'nxt.prev = newNode', [nx, nid]);
+      b.link(curr, 'next', nid);
+      b.snap('curr.next = newNode: curr points forward at the new node. Both directions are now linked.', 'curr.next = newNode', [curr, nid]);
+    }
+  }
+  return finish(b);
+}
+
+/* ---------- delete ---------- */
+function opDelete(list, doubly, k){
+  const b = new Builder(list, doubly);
+  const order0 = b.order();
+  const n = order0.length;
+  const A = id => b.nodes[id].addr;
+  const target = order0[k];
+
+  b.snap('Delete the node at index ' + k + ' (value ' + b.nodes[target].val + ').', 'delete(' + k + ')');
+
+  const freeStep = name => {
+    b.nodes[target].freed = true;
+    b.snap('free(' + name + '): the node is released. Nothing points at it anymore.', 'free(' + name + ')', [target]);
+  };
+
+  if (!doubly){
+    if (k === 0){
+      b.setPtr('del', target);
+      b.snap('del = head: keep a handle on the node we are removing.', 'del = head', [target]);
+      const nx = b.nodes[target].next;
+      b.setPtr('head', nx);
+      b.snap(nx ? 'head = head.next: head moves on to ' + A(nx) + ', cutting the first node out of the list.'
+                : 'head = head.next: it was the only node, so head becomes null and the list is empty.',
+        'head = head.next', [nx]);
+      freeStep('del');
+    } else {
+      let prev = order0[0];
+      b.setPtr('prev', prev);
+      b.snap(k === 1 ? 'prev = head: index 0 is right before the node we delete.'
+                     : 'prev = head: start walking from index 0. We need the node at index ' + (k - 1) + '.',
+        'prev = head', [prev]);
+      for (let i = 1; i <= k - 1; i++){
+        prev = b.nodes[prev].next;
+        b.setPtr('prev', prev);
+        b.snap('prev = prev.next: move to index ' + i + (i === k - 1 ? ', the node just before the one we delete.' : '.'),
+          'prev = prev.next', [prev]);
+      }
+      b.setPtr('del', target);
+      b.snap('del = prev.next: del marks the node at index ' + k + ' (value ' + b.nodes[target].val + ').', 'del = prev.next', [target]);
+      const after = b.nodes[target].next;
+      b.link(prev, 'next', after);
+      b.snap(after
+        ? 'prev.next = del.next: prev copies del’s next address (' + A(after) + '). The old link is cut and del is bypassed.'
+        : 'prev.next = del.next: del.next is null, so prev becomes the last node.',
+        'prev.next = del.next', [prev]);
+      freeStep('del');
+    }
+  } else {
+    if (n === 1){
+      b.setPtr('del', target);
+      b.snap('del = head: keep a handle on the only node.', 'del = head', [target]);
+      b.setPtr('head', null);
+      b.snap('head = del.next: del.next is null, so head becomes null.', 'head = del.next');
+      b.setPtr('tail', null);
+      b.snap('tail = del.prev: del.prev is null, so tail becomes null too.', 'tail = del.prev');
+      freeStep('del');
+    } else if (k === 0){
+      b.setPtr('del', target);
+      b.snap('del = head: keep a handle on the first node.', 'del = head', [target]);
+      const nx = b.nodes[target].next;
+      b.setPtr('head', nx);
+      b.snap('head = del.next: head moves on to ' + A(nx) + '.', 'head = del.next', [nx]);
+      b.link(nx, 'prev', null);
+      b.snap('head.prev = null: the new first node stops pointing back at del. The old back link is cut.', 'head.prev = null', [nx]);
+      freeStep('del');
+    } else if (k === n - 1){
+      b.setPtr('del', target);
+      b.snap('del = tail: keep a handle on the last node.', 'del = tail', [target]);
+      const pv = b.nodes[target].prev;
+      b.setPtr('tail', pv);
+      b.snap('tail = del.prev: tail moves back to ' + A(pv) + '.', 'tail = del.prev', [pv]);
+      b.link(pv, 'next', null);
+      b.snap('tail.next = null: the new last node stops pointing forward at del. The old link is cut.', 'tail.next = null', [pv]);
+      freeStep('del');
+    } else {
+      let curr = order0[0];
+      b.setPtr('curr', curr);
+      b.snap('curr = head: walk to index ' + k + ', the node to delete.', 'curr = head', [curr]);
+      for (let i = 1; i <= k; i++){
+        curr = b.nodes[curr].next;
+        b.setPtr('curr', curr);
+        b.snap('curr = curr.next: move to index ' + i + (i === k ? '. This is the node to delete.' : '.'), 'curr = curr.next', [curr]);
+      }
+      const pv = b.nodes[curr].prev, nx = b.nodes[curr].next;
+      b.setPtr('prev', pv);
+      b.snap('prev = curr.prev: the node before curr (' + A(pv) + ').', 'prev = curr.prev', [pv]);
+      b.setPtr('nxt', nx);
+      b.snap('nxt = curr.next: the node after curr (' + A(nx) + ').', 'nxt = curr.next', [nx]);
+      b.link(pv, 'next', nx);
+      b.snap('prev.next = nxt: the forward link skips curr. The old forward link is cut.', 'prev.next = nxt', [pv]);
+      b.link(nx, 'prev', pv);
+      b.snap('nxt.prev = prev: the back link skips curr too. curr is now fully bypassed.', 'nxt.prev = prev', [nx]);
+      freeStep('curr');
+    }
+  }
+  return finish(b);
+}
+
+/* ---------- reverse ---------- */
+function opReverse(list, doubly){
+  const b = new Builder(list, doubly);
+  const order0 = b.order();
+  const A = id => b.nodes[id].addr;
+
+  b.snap(doubly ? 'Reverse the list in place: every node swaps its prev and next links.'
+                : 'Reverse the list in place: every next link is flipped to point backward.',
+    'reverse()');
+
+  if (!doubly){
+    b.setPtr('prev', null);
+    b.snap('prev = null: nothing is reversed yet. The first node will end up pointing at null.', 'prev = null');
+    let curr = order0[0];
+    b.setPtr('curr', curr);
+    b.snap('curr = head: start at the first node.', 'curr = head', [curr]);
+    let prev = null;
+    while (curr){
+      const c = curr;
+      const nx = b.nodes[c].next;
+      b.setPtr('nxt', nx);
+      b.snap('nxt = curr.next: save the rest of the list before the link is overwritten' + (nx ? ' (' + A(nx) + ').' : ' (null: this is the last node).'),
+        'nxt = curr.next', [c]);
+      b.link(c, 'next', prev);
+      b.snap('curr.next = prev: flip the link so it points backward' + (prev ? ' at ' + A(prev) + '.' : ' at null.'),
+        'curr.next = prev', [c]);
+      prev = c;
+      b.setPtr('prev', prev);
+      b.snap('prev = curr: prev advances to the node that was just flipped.', 'prev = curr', [prev]);
+      curr = nx;
+      b.setPtr('curr', curr);
+      b.snap(nx ? 'curr = nxt: move on to the saved node.' : 'curr = nxt: nxt was null, so curr is null and the loop ends.',
+        'curr = nxt', [nx]);
+    }
+    b.setPtr('head', prev);
+    b.snap('head = prev: prev holds the old last node, so it becomes the new head.', 'head = prev', [prev]);
+  } else {
+    let curr = order0[0];
+    b.setPtr('curr', curr);
+    b.snap('curr = head: start at the first node.', 'curr = head', [curr]);
+    while (curr){
+      const c = curr;
+      const t = b.nodes[c].prev;
+      b.setPtr('tmp', t);
+      b.snap('tmp = curr.prev: save the old prev address before it is overwritten' + (t ? ' (' + A(t) + ').' : ' (null).'),
+        'tmp = curr.prev', [c]);
+      b.link(c, 'prev', b.nodes[c].next);
+      b.snap('curr.prev = curr.next: the prev field now holds what the next field held.', 'curr.prev = curr.next', [c]);
+      b.link(c, 'next', t);
+      b.snap('curr.next = tmp: the next field takes the saved old prev. This node’s two links are swapped.', 'curr.next = tmp', [c]);
+      curr = b.nodes[c].prev;
+      b.setPtr('curr', curr);
+      b.snap(curr ? 'curr = curr.prev: prev now holds the old next, so this walks forward.'
+                  : 'curr = curr.prev: it is null, so every node has been swapped and the loop ends.',
+        'curr = curr.prev', [curr]);
+    }
+    const oh = b.ptr('head'), ot = b.ptr('tail');
+    b.setPtr('head', ot);
+    b.setPtr('tail', oh);
+    b.snap('swap(head, tail): the old tail is the new head and the old head is the new tail.', 'swap(head, tail)', [ot, oh]);
+  }
+  return finish(b);
+}
+
+/* ================= rendering ================= */
+const stage = $('stage'), scrollBox = $('scrollBox');
+const arrowLayer = $('arrowLayer'), labelLayer = $('labelLayer');
+const chipEl = $('nullChip'), emptyEl = $('emptyHint'), toastEl = $('toast');
+const nodeEls = {}, tagEls = {};
+let curSnap = null;
+
+function tagW(name){ return Math.max(54, Math.round(name.length * 8.6 + 26)); }
+
+function makeNodeEl(n, doubly){
+  const el = document.createElement('div');
+  el.className = 'node';
+  el.style.width = (doubly ? 188 : 127) + 'px';
+  el.innerHTML =
+    '<div class="addr"></div><div class="cells">' +
+    (doubly ? '<div class="cell pcell prev"><span class="lbl">prev</span><span class="pv"></span><i class="dot prev"></i></div>' : '') +
+    '<div class="cell vcell"><span class="lbl">data</span><b></b></div>' +
+    '<div class="cell pcell next"><span class="lbl">next</span><span class="pv"></span><i class="dot next"></i></div>' +
+    '</div>';
+  return el;
+}
+function setPv(el, field, to, byId){
+  const pv = el.querySelector('.pcell.' + field + ' .pv');
+  const dot = el.querySelector('.dot.' + field);
+  const t = to && byId[to] ? byId[to] : null;
+  pv.textContent = t ? t.addr : 'null';
+  pv.classList.toggle('null', !t);
+  dot.classList.toggle('null', !t);
+}
+
+function render(s){
+  curSnap = s;
+  const cfg = M[mode], nw = cfg.nw, doubly = cfg.doubly, STEP = nw + GAP;
+  const X = slot => PADX + slot * STEP;
+  const byId = {};
+  s.nodes.forEach(n => { byId[n.id] = n; });
+
+  const rowCount = s.nodes.filter(n => n.lane === 'row').length;
+  const maxSlot = s.nodes.reduce((m, n) => Math.max(m, n.slot), -1);
+  const hasNull = s.ptrs.some(p => p.target === null);
+  const chipSlot = rowCount + (s.hole !== null ? 1 : 0);
+  const slotsNeeded = Math.max(maxSlot + 1, hasNull ? chipSlot + 1 : 0, 1);
+  stage.style.width = (PADX * 2 + slotsNeeded * STEP - GAP) + 'px';
+
+  /* nodes */
+  const keep = {};
+  s.nodes.forEach(n => {
+    keep[n.id] = true;
+    let el = nodeEls[n.id];
+    let created = false;
+    if (!el){
+      el = makeNodeEl(n, doubly);
+      nodeEls[n.id] = el;
+      stage.appendChild(el);
+      created = true;
+    }
+    const x = X(n.slot), y = n.lane === 'stage' ? STAGE_TOP : ROW_TOP;
+    if (created){
+      el.style.transition = 'none';
+      el.style.left = x + 'px'; el.style.top = y + 'px';
+      void el.offsetWidth;
+      el.style.transition = '';
+      el.classList.add('fresh');
+    } else {
+      el.style.left = x + 'px'; el.style.top = y + 'px';
+    }
+    el.classList.toggle('freed', n.freed);
+    el.classList.toggle('staged', n.lane === 'stage');
+    el.classList.toggle('active', s.active.indexOf(n.id) >= 0);
+    el.querySelector('.addr').textContent = n.addr + (n.freed ? ' \u00B7 freed' : '');
+    el.querySelector('.vcell b').textContent = n.val;
+    setPv(el, 'next', n.next, byId);
+    el.querySelector('.pcell.next').classList.toggle('hl', s.newL.some(l => l.from === n.id && l.field === 'next'));
+    if (doubly){
+      setPv(el, 'prev', n.prev, byId);
+      el.querySelector('.pcell.prev').classList.toggle('hl', s.newL.some(l => l.from === n.id && l.field === 'prev'));
+    }
+  });
+  Object.keys(nodeEls).forEach(id => { if (!keep[id]){ nodeEls[id].remove(); delete nodeEls[id]; } });
+
+  /* null chip + empty hint */
+  chipEl.style.display = hasNull ? 'block' : 'none';
+  chipEl.style.left = (X(chipSlot) + (nw - 76) / 2) + 'px';
+  chipEl.style.top = (ROW_TOP + 22) + 'px';
+  emptyEl.style.display = s.nodes.length ? 'none' : 'block';
+
+  /* pointer tags */
+  const groups = {}, keys = [];
+  s.ptrs.forEach(p => {
+    const key = p.target === null ? '#null' : p.target;
+    if (!groups[key]){ groups[key] = []; keys.push(key); }
+    groups[key].push(p);
+  });
+  const seen = {};
+  keys.forEach(key => {
+    const arr = groups[key];
+    let cx, ty;
+    if (key === '#null'){ cx = X(chipSlot) + nw / 2; ty = TAG_TOP; }
+    else {
+      const n = byId[key];
+      cx = X(n.slot) + nw / 2;
+      ty = n.lane === 'stage' ? STAGE_TOP - TAG_ARROW - TAG_H : TAG_TOP;
+    }
+    const widths = arr.map(p => tagW(p.name));
+    const total = widths.reduce((a, b) => a + b, 0) + 6 * (arr.length - 1);
+    let x = cx - total / 2;
+    arr.forEach((p, i) => {
+      seen[p.name] = true;
+      let el = tagEls[p.name];
+      if (!el){
+        el = document.createElement('div');
+        el.className = 'ptr-tag' + (p.main ? ' main' : '');
+        el.textContent = p.name;
+        el.style.width = widths[i] + 'px';
+        stage.appendChild(el);
+        tagEls[p.name] = el;
+        el.style.transition = 'none';
+        el.style.left = x + 'px'; el.style.top = ty + 'px';
+        void el.offsetWidth;
+        el.style.transition = '';
+        el.classList.add('fresh');
+      } else {
+        el.style.left = x + 'px'; el.style.top = ty + 'px';
+      }
+      x += widths[i] + 6;
+    });
+  });
+  Object.keys(tagEls).forEach(nm => { if (!seen[nm]){ tagEls[nm].remove(); delete tagEls[nm]; } });
+
+  /* keep the action in view when the list is wider than the panel */
+  const focus = s.active.find(id => byId[id]);
+  if (focus && scrollBox.scrollTo){
+    const cx = X(byId[focus].slot) + nw / 2;
+    const view = scrollBox.clientWidth, left = scrollBox.scrollLeft;
+    if (view && (cx < left + 100 || cx > left + view - 100)){
+      scrollBox.scrollTo({ left: Math.max(0, cx - view / 2), behavior: 'smooth' });
+    }
+  }
+  animateArrows(900);
+}
+
+/* ================= arrows (drawn from live element positions) ================= */
+let rafId = 0, until = 0;
+function animateArrows(ms){
+  until = performance.now() + ms;
+  if (!rafId) rafId = requestAnimationFrame(tick);
+}
+function tick(){
+  drawArrows();
+  if (performance.now() < until) rafId = requestAnimationFrame(tick); else rafId = 0;
+}
+function svgEl(name, attrs){
+  const e = document.createElementNS(NS, name);
+  Object.keys(attrs || {}).forEach(k => e.setAttribute(k, attrs[k]));
+  return e;
+}
+function drawArrows(){
+  const s = curSnap;
+  if (!s) return;
+  while (arrowLayer.firstChild) arrowLayer.removeChild(arrowLayer.firstChild);
+  while (labelLayer.firstChild) labelLayer.removeChild(labelLayer.firstChild);
+
+  const sr = stage.getBoundingClientRect();
+  const R = el => { const r = el.getBoundingClientRect(); return { l:r.left - sr.left, t:r.top - sr.top, r:r.right - sr.left, b:r.bottom - sr.top }; };
+  const doubly = M[mode].doubly;
+  const byId = {};
+  s.nodes.forEach(n => { byId[n.id] = n; });
+  const rowNodes = s.nodes.filter(n => n.lane === 'row');
+  const isNew = (id, f) => s.newL.some(l => l.from === id && l.field === f);
+
+  const links = [];
+  s.nodes.forEach(n => {
+    if (n.freed) return;
+    links.push({ from:n.id, field:'next', to:n.next, cls: isNew(n.id, 'next') ? 'new' : 'normal' });
+    if (doubly) links.push({ from:n.id, field:'prev', to:n.prev, cls: isNew(n.id, 'prev') ? 'new' : 'normal' });
+  });
+  s.oldL.forEach(l => {
+    if (byId[l.from] && byId[l.to] && !byId[l.from].freed) links.push({ from:l.from, field:l.field, to:l.to, cls:'ghost' });
+  });
+  const rank = { ghost:0, normal:1, 'new':2 };
+  links.sort((a, b) => rank[a.cls] - rank[b.cls]);
+
+  function label(path, kind){
+    let pt;
+    try { pt = path.getPointAtLength(path.getTotalLength() / 2); } catch (e) { return; }
+    if (!pt) return;
+    if (kind === 'new'){
+      labelLayer.appendChild(svgEl('rect', { x:pt.x - 19, y:pt.y - 10, width:38, height:20, rx:8, fill:'#FFC93C', stroke:'#F2A900', 'stroke-width':2 }));
+      const t = svgEl('text', { x:pt.x, y:pt.y + 4, 'text-anchor':'middle', 'font-size':11, 'font-weight':600, 'font-family':'Fira Code, monospace', fill:'#B0350B' });
+      t.textContent = 'new';
+      labelLayer.appendChild(t);
+    } else {
+      labelLayer.appendChild(svgEl('circle', { cx:pt.x, cy:pt.y, r:10, fill:'#fff', stroke:'#F4511E', 'stroke-width':2 }));
+      const t = svgEl('text', { x:pt.x, y:pt.y + 5, 'text-anchor':'middle', 'font-size':14, 'font-weight':700, 'font-family':'Fredoka, sans-serif', fill:'#F4511E' });
+      t.textContent = '\u2715';
+      labelLayer.appendChild(t);
+    }
+  }
+
+  links.forEach(l => {
+    const fEl = nodeEls[l.from];
+    if (!fEl) return;
+    const dotEl = fEl.querySelector('.dot.' + l.field);
+    if (!dotEl) return;
+    const dr = R(dotEl);
+    const x1 = (dr.l + dr.r) / 2, y1 = (dr.t + dr.b) / 2;
+    const f = byId[l.from];
+    const base = l.field === 'next' ? COL.next : COL.prev;
+    const isNewL = l.cls === 'new', isGhost = l.cls === 'ghost';
+    let d, marker = null, color = base, cap = null;
+
+    if (l.to === null){
+      const dir = l.field === 'next' ? 1 : -1;
+      const x2 = x1 + dir * 46;
+      d = 'M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y1;
+      cap = 'M' + x2 + ' ' + (y1 - 8) + ' L' + x2 + ' ' + (y1 + 8);
+      color = isNewL ? base : COL.stub;
+    } else {
+      const tEl = nodeEls[l.to];
+      const t = byId[l.to];
+      if (!tEl || !t) return;
+      const tr = R(tEl);
+      let direct;
+      if (f.lane === 'stage' || t.lane === 'stage'){
+        direct = true;
+      } else {
+        const forward = l.field === 'next' ? t.slot > f.slot : t.slot < f.slot;
+        if (!forward) direct = false;
+        else {
+          const lo = Math.min(f.slot, t.slot), hi = Math.max(f.slot, t.slot);
+          direct = !rowNodes.some(n => n.slot > lo && n.slot < hi);
+        }
+      }
+      if (direct){
+        let ex, ey;
+        if (x1 < tr.l - 2){ ex = tr.l; ey = clamp(y1, tr.t + 10, tr.b - 10); }
+        else if (x1 > tr.r + 2){ ex = tr.r; ey = clamp(y1, tr.t + 10, tr.b - 10); }
+        else if (y1 < tr.t){ ex = clamp(x1, tr.l + 14, tr.r - 14); ey = tr.t; }
+        else { ex = clamp(x1, tr.l + 14, tr.r - 14); ey = tr.b; }
+        d = 'M' + x1 + ' ' + y1 + ' L' + ex + ' ' + ey;
+      } else {
+        const span = Math.abs(t.slot - f.slot);
+        const h = (l.field === 'next' ? 46 : 78) + Math.min(span - 1, 4) * 10;
+        const targetLeft = t.slot < f.slot;
+        const lx = targetLeft ? tr.r - 46 : tr.l + 46;
+        const baseY = Math.min(R(fEl).t, tr.t);
+        const cy = baseY - 1.34 * h - 6;
+        d = 'M' + x1 + ' ' + y1 + ' C ' + x1 + ' ' + cy + ', ' + lx + ' ' + cy + ', ' + lx + ' ' + tr.t;
+      }
+      marker = isGhost ? 'mk-old' : (l.field === 'next' ? 'mk-next' : 'mk-prev');
+      if (isGhost) color = COL.old;
+    }
+
+    if (isNewL){
+      arrowLayer.appendChild(svgEl('path', { d:d, fill:'none', stroke:COL.glow, 'stroke-width':12, 'stroke-linecap':'round' }));
+    }
+    const attrs = { d:d, fill:'none', stroke:color, 'stroke-width': isNewL ? 4.5 : 3, 'stroke-linecap':'round' };
+    if (marker) attrs['marker-end'] = 'url(#' + marker + ')';
+    if (isGhost){ attrs['stroke-dasharray'] = '7 6'; attrs.opacity = 0.6; }
+    const path = svgEl('path', attrs);
+    arrowLayer.appendChild(path);
+    if (cap) arrowLayer.appendChild(svgEl('path', { d:cap, fill:'none', stroke:color, 'stroke-width':3, 'stroke-linecap':'round' }));
+    if (isNewL) label(path, 'new');
+    if (isGhost) label(path, 'old');
+  });
+
+  /* pointer tag arrows */
+  s.ptrs.forEach(p => {
+    const tEl = tagEls[p.name];
+    if (!tEl) return;
+    const tr = R(tEl);
+    const cx = (tr.l + tr.r) / 2;
+    let ex, ey, sy;
+    if (p.target === null){
+      if (chipEl.style.display === 'none') return;
+      const cr = R(chipEl);
+      ex = clamp(cx, cr.l + 14, cr.r - 14); ey = cr.b; sy = tr.t;
+    } else {
+      const nEl = nodeEls[p.target], n = byId[p.target];
+      if (!nEl || !n) return;
+      const nr = R(nEl);
+      ex = clamp(cx, nr.l + 16, nr.r - 16);
+      if (n.lane === 'stage'){ sy = tr.b; ey = nr.t; } else { sy = tr.t; ey = nr.b; }
+    }
+    arrowLayer.appendChild(svgEl('path', {
+      d:'M' + cx + ' ' + sy + ' L' + ex + ' ' + ey,
+      fill:'none', stroke:COL.ptr, 'stroke-width':2.5, 'stroke-linecap':'round', 'marker-end':'url(#mk-ptr)'
+    }));
+  });
+}
+window.addEventListener('resize', () => animateArrows(60));
+
+/* ================= UI wiring ================= */
+const prevBtn = $('prevBtn'), nextBtn = $('nextBtn'), finishBtn = $('finishBtn');
+const valIn = $('valInput'), idxIn = $('idxInput');
+
+/* the list only changes once the last step of an operation is reached */
+function eff(cur){
+  return (cur.steps.length && cur.idx === cur.steps.length - 1) ? cur.after : cur.list;
+}
+function busy(cur){
+  return cur.steps.length > 0 && cur.idx < cur.steps.length - 1;
+}
+function baseSnap(cur){
+  const b = new Builder(cur.list, cur.doubly);
+  b.snap('', '');
+  return b.steps[0];
+}
+function updateUI(){
+  const cur = M[mode];
+  const has = cur.steps.length > 0;
+  prevBtn.disabled = !has || cur.idx <= 0;
+  nextBtn.disabled = !has || cur.idx >= cur.steps.length - 1;
+  finishBtn.disabled = nextBtn.disabled;
+  if (!has){
+    $('stepBadge').textContent = 'ready';
+    $('stepText').textContent = 'Choose insert, delete or reverse. The operation plays out one step at a time.';
+    $('stepCode').textContent = '';
+  } else {
+    const s = cur.steps[cur.idx];
+    $('stepBadge').textContent = 'step ' + (cur.idx + 1) + ' of ' + cur.steps.length;
+    $('stepText').textContent = s.text;
+    $('stepCode').textContent = s.code;
+  }
+}
+function show(){
+  const cur = M[mode];
+  render(cur.steps.length ? cur.steps[cur.idx] : baseSnap(cur));
+  updateUI();
+}
+function startOp(build){
+  const cur = M[mode];
+  const start = eff(cur);
+  const b = build(start, cur.doubly);
+  cur.list = start;
+  cur.after = finalList(b);
+  cur.steps = b.steps;
+  cur.idx = 0;
+  show();
+}
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+}
+function resetStage(){
+  Object.keys(nodeEls).forEach(id => { nodeEls[id].remove(); delete nodeEls[id]; });
+  Object.keys(tagEls).forEach(nm => { tagEls[nm].remove(); delete tagEls[nm]; });
+}
+function setMode(m){
+  if (m === mode) return;
+  mode = m;
+  resetStage();
+  $('modeSingly').classList.toggle('on', m === 'singly');
+  $('modeDoubly').classList.toggle('on', m === 'doubly');
+  $('zoneLabel').textContent = m === 'singly' ? 'singly linked list' : 'doubly linked list';
+  $('lgPrev').style.display = m === 'doubly' ? 'inline-flex' : 'none';
+  scrollBox.scrollLeft = 0;
+  show();
+}
+$('modeSingly').addEventListener('click', () => setMode('singly'));
+$('modeDoubly').addEventListener('click', () => setMode('doubly'));
+
+$('insertBtn').addEventListener('click', () => {
+  const cur = M[mode];
+  if (busy(cur)){ toast('Finish the current operation first (use next or finish).'); return; }
+  const L = eff(cur);
+  const n = orderOf(L.nodes, L.head).length;
+  const val = valIn.value.trim(), idxRaw = idxIn.value.trim();
+  if (!val){ toast('Type a value to insert.'); return; }
+  if (n >= MAX_NODES){ toast('The list is full (' + MAX_NODES + ' nodes max).'); return; }
+  let k = n;
+  if (idxRaw !== ''){
+    if (!/^\d+$/.test(idxRaw)){ toast('The index must be a whole number.'); return; }
+    k = parseInt(idxRaw, 10);
+    if (k > n){ toast('The index must be between 0 and ' + n + '.'); return; }
+  }
+  startOp((l, d) => opInsert(l, d, val, k));
+});
+$('deleteBtn').addEventListener('click', () => {
+  const cur = M[mode];
+  if (busy(cur)){ toast('Finish the current operation first (use next or finish).'); return; }
+  const L = eff(cur);
+  const order = orderOf(L.nodes, L.head);
+  const n = order.length;
+  const val = valIn.value.trim(), idxRaw = idxIn.value.trim();
+  if (n === 0){ toast('The list is empty ~ nothing to delete.'); return; }
+  let k;
+  if (idxRaw !== ''){
+    if (!/^\d+$/.test(idxRaw)){ toast('The index must be a whole number.'); return; }
+    k = parseInt(idxRaw, 10);
+    if (k > n - 1){ toast('The index must be between 0 and ' + (n - 1) + '.'); return; }
+  } else if (val !== ''){
+    k = order.findIndex(id => L.nodes[id].val === val);
+    if (k < 0){ toast('No node holds the value ' + val + '.'); return; }
+  } else {
+    toast('Type an index (or a value) to delete.'); return;
+  }
+  startOp((l, d) => opDelete(l, d, k));
+});
+$('reverseBtn').addEventListener('click', () => {
+  const cur = M[mode];
+  if (busy(cur)){ toast('Finish the current operation first (use next or finish).'); return; }
+  if (!eff(cur).head){ toast('The list is empty ~ nothing to reverse.'); return; }
+  startOp((l, d) => opReverse(l, d));
+});
+
+prevBtn.addEventListener('click', () => {
+  const cur = M[mode];
+  if (cur.idx > 0){ cur.idx--; show(); }
+});
+nextBtn.addEventListener('click', () => {
+  const cur = M[mode];
+  if (cur.idx < cur.steps.length - 1){ cur.idx++; show(); }
+});
+finishBtn.addEventListener('click', () => {
+  const cur = M[mode];
+  if (cur.steps.length){ cur.idx = cur.steps.length - 1; show(); }
+});
+document.addEventListener('keydown', e => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (e.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
+  else if (e.key === 'ArrowLeft' && !prevBtn.disabled) prevBtn.click();
+});
+
+show();
+})();
+</script>
+</body>
+</html>
