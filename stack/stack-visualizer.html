@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stack Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FFFDF7; --paper: #FFF9EC; --beige: #FFF1D6;
+  --terra: #FF8A65; --terra-dark: #F4511E; --terra-ink: #B0350B;
+  --mint: #4DD0A7; --mint-dark: #16A87D; --mint-ink: #0B6E52; --mint-m: #BFF0DD;
+  --sun: #FFC93C; --sun-dark: #F2A900; --sun-m: #FFE08A; --sun-l: #FFF1D6; --sun-ink: #7A4B00;
+  --purple: #8B6BB0; --purple-ink: #5C3D80;
+  --slate: #3D405B; --soft: #8B8AA8; --line: #FFD98A; --chip-line: #C9BC9A;
+  --shadow: 3px 5px 0 rgba(61,64,91,0.10);
+  --radius: 20px;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--cream);
+  background-image: radial-gradient(circle at 1px 1px, rgba(244,81,30,0.12) 1.5px, transparent 0);
+  background-size: 20px 20px;
+  color: var(--slate);
+  font-family: 'Fredoka', sans-serif;
+  color-scheme: light;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding: 24px 18px 44px; }
+
+/* header + tabs */
+header.top { text-align: center; margin-bottom: 14px; }
+header.top h1 {
+  margin: 0; font-family: 'Caveat', cursive; font-weight: 700; font-size: 46px;
+  color: var(--terra-dark); transform: rotate(-1.5deg); display: inline-block;
+  text-shadow: 2px 2px 0 var(--sun);
+}
+header.top .sub { font-size: 13.5px; color: var(--soft); margin-top: 2px; }
+.tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; margin: 14px 0 18px; }
+
+/* buttons */
+button {
+  font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 13.5px;
+  border: 2.5px solid var(--slate); border-radius: 13px; padding: 9px 14px;
+  cursor: pointer; background: #fff; color: var(--slate);
+  box-shadow: 2px 3px 0 var(--slate);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+button:hover { transform: translate(-1px,-1px); box-shadow: 3px 4px 0 var(--slate); }
+button:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--slate); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+button.primary { background: var(--terra); color: #fff; border-color: var(--terra-ink); box-shadow: 2px 3px 0 var(--terra-ink); }
+button.primary:hover { background: #FF7043; box-shadow: 3px 4px 0 var(--terra-ink); }
+button.mint { background: var(--mint); color: #fff; border-color: var(--mint-ink); box-shadow: 2px 3px 0 var(--mint-ink); }
+button.mint:hover { background: #3FC79A; box-shadow: 3px 4px 0 var(--mint-ink); }
+button.sun { background: var(--sun); color: var(--terra-ink); border-color: var(--sun-dark); box-shadow: 2px 3px 0 var(--sun-dark); }
+button.sun:hover { background: #FFD65C; box-shadow: 3px 4px 0 var(--sun-dark); }
+button:disabled { opacity: .4; cursor: default; transform: none !important; }
+.tab { font-size: 15px; padding: 10px 16px; }
+.tab.on { background: var(--terra); color: #fff; border-color: var(--terra-ink); box-shadow: 2px 3px 0 var(--terra-ink); }
+
+/* toolbar */
+.toolbar-panel {
+  background: var(--beige); border: 3px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 12px 14px; margin-bottom: 18px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 9px;
+}
+.toolbar-label { font-family: 'Caveat', cursive; font-weight: 700; font-size: 20px; color: var(--terra-ink); }
+input[type=text], select {
+  font-family: 'Fira Code', monospace; font-size: 14px; padding: 8px 11px;
+  border: 2.5px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--slate);
+}
+input[type=text] { width: 140px; }
+#bInput { width: 84px; text-align: center; font-size: 16px; }
+.vsep { width: 2px; height: 28px; background: var(--line); border-radius: 2px; margin: 0 4px; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.controls .count { font-size: 12.5px; color: var(--soft); min-width: 74px; }
+.controls .speed { font-size: 12.5px; color: var(--soft); display: inline-flex; align-items: center; gap: 6px; }
+.controls input[type=range] { width: 70px; accent-color: var(--terra-dark); }
+
+/* canvas */
+.mode { display: none; }
+.mode.on { display: block; }
+.canvas-panel {
+  position: relative; background: var(--paper); border: 3px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 22px 26px; overflow: hidden;
+}
+.toast {
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--sun); color: var(--terra-ink); border: 2.5px solid var(--sun-dark);
+  padding: 10px 16px; border-radius: 13px; font-size: 13.5px; font-weight: 500;
+  box-shadow: var(--shadow); opacity: 0; z-index: 10; transition: all .25s ease;
+  max-width: 90%; text-align: center; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* jar (the stack) */
+.jar-col { display: flex; flex-direction: column; align-items: center; }
+.io { width: 100%; display: flex; justify-content: space-between; font-family: 'Caveat', cursive; font-weight: 700; font-size: 21px; margin-bottom: 4px; padding: 0 6px; }
+.io-in { color: var(--mint-ink); } .io-out { color: var(--terra-ink); }
+.jar {
+  position: relative; width: 150px; min-height: 300px; padding: 8px 0;
+  border: 4px solid var(--slate); border-top: none; border-radius: 0 0 24px 24px;
+  background: rgba(255,255,255,.6); box-shadow: var(--shadow);
+  display: flex; flex-direction: column-reverse;
+}
+.jar::before, .jar::after { content: ''; position: absolute; top: 0; width: 14px; border-top: 4px solid var(--slate); }
+.jar::before { left: -18px; } .jar::after { right: -18px; }
+.jar.small { width: 124px; }
+.jar-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Caveat', cursive; font-size: 24px; color: var(--soft); pointer-events: none; }
+.jar-title { font-family: 'Caveat', cursive; font-weight: 700; font-size: 21px; color: var(--soft); margin-top: 8px; text-align: center; }
+
+.card {
+  position: relative; height: 36px; margin: 4px 8px 0; border: 3px solid; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fira Code', monospace; font-weight: 600; font-size: 17px;
+  animation: floaty 4.6s ease-in-out infinite;
+}
+.card.istop { box-shadow: 0 0 0 4px rgba(244,81,30,.22); }
+.card.glow { box-shadow: 0 0 0 5px rgba(255,201,60,.65); }
+.card.new { animation: dropIn .45s ease; }
+.card.ghost { position: absolute; left: 8px; right: 8px; margin: 0; animation: flyOut .65s ease forwards; pointer-events: none; z-index: 3; }
+.top-tag { position: absolute; right: -78px; top: 50%; transform: translateY(-50%); font-family: 'Caveat', cursive; font-weight: 700; font-size: 21px; color: var(--terra-ink); white-space: nowrap; }
+.top-tag::before { content: '\25C0  '; font-size: 13px; }
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes dropIn { 0% { transform: translateY(-80px); opacity: 0; } 60% { transform: translateY(4px); opacity: 1; } 100% { transform: translateY(0); } }
+@keyframes flyOut { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-90px) rotate(-5deg); opacity: 0; } }
+
+/* basic mode stage */
+.stage.basic { display: flex; flex-wrap: wrap; gap: 54px; align-items: flex-end; justify-content: center; padding-right: 60px; }
+.side { flex: 1 1 250px; max-width: 340px; display: flex; flex-direction: column; gap: 12px; align-self: center; }
+.ribbon { font-family: 'Caveat', cursive; font-weight: 700; font-size: 32px; color: var(--terra-dark); transform: rotate(-1.5deg); text-shadow: 2px 2px 0 var(--sun); }
+.ribbon-sub { font-size: 13.5px; color: var(--soft); margin-top: -6px; }
+.size-pill { display: inline-block; align-self: flex-start; background: var(--mint-m); border: 2.5px solid var(--mint); color: var(--mint-ink); border-radius: 999px; padding: 6px 16px; font-family: 'Fira Code', monospace; font-weight: 600; font-size: 15px; }
+.answer { min-height: 46px; background: var(--slate); color: #fff; font-family: 'Fira Code', monospace; font-size: 15px; padding: 11px 16px; border-radius: 14px; visibility: hidden; }
+.answer.show { visibility: visible; animation: bubbleIn .4s ease; }
+@keyframes bubbleIn { 0% { opacity: 0; transform: translateY(6px) scale(.94); } 100% { opacity: 1; transform: none; } }
+
+/* messages */
+.msg { margin-top: 6px; font-size: 14.5px; line-height: 1.5; background: var(--sun-l); border: 2.5px dashed var(--sun-dark); border-radius: 14px; padding: 10px 14px; min-height: 44px; }
+
+/* application layout */
+.app-grid { display: grid; grid-template-columns: 1fr 270px; gap: 22px; align-items: start; }
+@media (max-width: 860px) { .app-grid { grid-template-columns: 1fr; } .stage.basic { padding-right: 40px; gap: 40px; } }
+.row-label { font-family: 'Caveat', cursive; font-weight: 700; font-size: 22px; color: var(--mint-ink); margin: 8px 0 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; min-height: 48px; align-items: center; padding-top: 6px; }
+.chips:empty::after { content: 'nothing yet'; font-family: 'Caveat', cursive; font-size: 20px; color: var(--soft); }
+.chip {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 40px; padding: 0 9px;
+  border: 2.5px solid var(--chip-line); border-radius: 12px; background: #fff;
+  font-family: 'Fira Code', monospace; font-weight: 600; font-size: 17px; transition: all .2s ease;
+}
+.chip.done { background: var(--mint-m); border-color: var(--mint); color: var(--mint-ink); }
+.chip.faded { opacity: .45; }
+.chip.unread { opacity: .3; }
+.chip.now { background: var(--sun-m); border-color: var(--sun-dark); color: var(--sun-ink); transform: translateY(-4px) scale(1.08); }
+.chip.bad { background: var(--terra-m, #FFD0B5); border-color: var(--terra-dark); color: var(--terra-ink); }
+.chip.out { background: var(--mint-m); border-color: var(--mint); color: var(--mint-ink); }
+.chip.out.newest { animation: dropIn .45s ease; }
+.jars { display: flex; flex-wrap: wrap; gap: 96px; justify-content: center; padding: 18px 70px 4px 24px; }
+.jar-row { display: flex; justify-content: center; padding: 14px 70px 0 20px; }
+.recipe { background: #fff; border: 3px solid var(--line); border-radius: 18px; padding: 12px 16px 14px; box-shadow: var(--shadow); }
+.recipe h3 { margin: 0 0 6px; font-family: 'Caveat', cursive; font-weight: 700; font-size: 25px; color: var(--terra-ink); }
+.recipe ol { margin: 0; padding: 0; list-style: none; counter-reset: r; }
+.recipe li { counter-increment: r; position: relative; padding: 8px 8px 8px 34px; margin: 4px 0; border-radius: 12px; font-size: 13.5px; line-height: 1.4; border-left: 4px solid transparent; }
+.recipe li::before { content: counter(r); position: absolute; left: 7px; top: 8px; width: 20px; height: 20px; border-radius: 50%; background: var(--sun-l); border: 2px solid var(--sun-dark); font-size: 11px; font-weight: 600; text-align: center; line-height: 16px; color: var(--sun-ink); }
+.recipe li.active { background: var(--sun-l); border-left-color: var(--sun-dark); font-weight: 600; }
+.badges { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 8px 0 2px; }
+.badge { font-family: 'Fira Code', monospace; font-size: 14px; font-weight: 600; padding: 6px 14px; border-radius: 999px; border: 2.5px solid var(--mint); background: var(--mint-m); color: var(--mint-ink); }
+.badge.bad { border-color: var(--terra-dark); background: #FFD0B5; color: var(--terra-ink); }
+.banner { margin-top: 10px; padding: 11px 16px; border-radius: 14px; font-weight: 600; font-size: 16px; text-align: center; display: none; }
+.banner.show { display: block; animation: bubbleIn .4s ease; }
+.banner.ok { background: var(--mint-m); border: 3px solid var(--mint); color: var(--mint-ink); }
+.banner.bad { background: #FFD0B5; border: 3px solid var(--terra-dark); color: var(--terra-ink); }
+.eval { min-height: 46px; margin: 12px auto 0; max-width: 360px; text-align: center; background: var(--sun-l); border: 3px dashed var(--sun-dark); border-radius: 14px; padding: 8px 14px; font-family: 'Fira Code', monospace; font-weight: 600; font-size: 18px; color: var(--sun-ink); visibility: hidden; }
+.eval small { display: block; font-family: 'Fredoka', sans-serif; font-weight: 400; font-size: 12px; color: var(--soft); }
+.eval.show { visibility: visible; animation: bubbleIn .4s ease; }
+@media (prefers-reduced-motion: reduce) { .card, .card.new, .chip.out.newest { animation: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Stack Playground</h1>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-mode="basic">stack basics</button>
+    <button class="tab" data-mode="reverse">reverse a word</button>
+    <button class="tab" data-mode="balanced">balanced ( )</button>
+    <button class="tab" data-mode="calc">calculator</button>
+  </nav>
+
+  <!-- ===================== BASICS ===================== -->
+  <section class="mode on" id="mode-basic">
+    <div class="toolbar-panel">
+      <span class="toolbar-label">item:</span>
+      <input type="text" id="bInput" maxlength="4" placeholder="7" autocomplete="off" aria-label="Item to push">
+      <button id="bPush" class="primary">push</button>
+      <button id="bPop" class="mint">pop</button>
+      <span class="vsep"></span>
+      <span class="toolbar-label">ask:</span>
+      <button id="bTop" class="sun">top</button>
+      <button id="bEmptyQ">empty</button>
+      <button id="bSizeQ">size</button>
+      <button id="bClear">clear</button>
+    </div>
+    <div class="canvas-panel">
+      <div class="stage basic">
+        <div class="jar-col">
+          <div class="io"><span class="io-in">push &darr;</span><span class="io-out">&uarr; pop</span></div>
+          <div class="jar" id="bJar"></div>
+          <div class="jar-title">stack</div>
+        </div>
+        <div class="side">
+          <div class="ribbon">Last In, First Out</div>
+          <div class="ribbon-sub">the last item you push is the first one to pop</div>
+          <div class="size-pill">size() = <b id="bSizeVal">0</b></div>
+          <div class="answer" id="bBubble"></div>
+          <div class="msg" id="bMsg">Type an item and press push to start.</div>
+        </div>
+      </div>
+      <div class="toast" id="toast-basic" role="status"></div>
+    </div>
+  </section>
+
+  <!-- ===================== REVERSE A WORD ===================== -->
+  <section class="mode" id="mode-reverse">
+    <div class="toolbar-panel">
+      <span class="toolbar-label">word:</span>
+      <input type="text" id="rInput" maxlength="10" value="NAT" placeholder="NAT" autocomplete="off" aria-label="Word to reverse">
+      <button id="rGo" class="primary">start</button>
+      <span class="vsep"></span>
+      <div class="controls" id="rControls"></div>
+    </div>
+    <div class="canvas-panel">
+      <div class="app-grid">
+        <div>
+          <div class="row-label">input</div>
+          <div class="chips" id="rIn"></div>
+          <div class="jar-row"><div class="jar-col"><div class="jar small" id="rJar"></div><div class="jar-title">stack of characters</div></div></div>
+          <div class="row-label">output</div>
+          <div class="chips" id="rOut"></div>
+          <div class="msg" id="rMsg"></div>
+        </div>
+        <aside class="recipe"><h3>recipe: reversing a word</h3><ol id="rRecipe"></ol></aside>
+      </div>
+      <div class="toast" id="toast-reverse" role="status"></div>
+    </div>
+  </section>
+
+  <!-- ===================== BALANCED PARENTHESES ===================== -->
+  <section class="mode" id="mode-balanced">
+    <div class="toolbar-panel">
+      <span class="toolbar-label">expression:</span>
+      <input type="text" id="pInput" maxlength="36" value="(( )( ))" style="width:230px" autocomplete="off" aria-label="Expression to check">
+      <button id="pGo" class="primary">start</button>
+      <select id="pExamples" aria-label="Examples">
+        <option value="">try an example</option>
+        <option value="(( )( ))">(( )( )) &nbsp;balanced</option>
+        <option value="((X + Y*(Z + 7))*(A + B))">((X + Y*(Z + 7))*(A + B)) &nbsp;balanced</option>
+        <option value="((X + Y*(Z + 7)*(A + B))">((X + Y*(Z + 7)*(A + B)) &nbsp;one ( left over</option>
+        <option value="(A + B))">(A + B)) &nbsp;extra )</option>
+      </select>
+      <span class="vsep"></span>
+      <div class="controls" id="pControls"></div>
+    </div>
+    <div class="canvas-panel">
+      <div class="app-grid">
+        <div>
+          <div class="row-label">expression</div>
+          <div class="chips" id="pChips"></div>
+          <div class="jar-row"><div class="jar-col"><div class="jar small" id="pJar"></div><div class="jar-title">store (left parentheses)</div></div></div>
+          <div class="badges"><span class="badge" id="pFailed">failed = false</span></div>
+          <div class="banner" id="pBanner"></div>
+          <div class="msg" id="pMsg"></div>
+        </div>
+        <aside class="recipe"><h3>recipe: is_balanced</h3><ol id="pRecipe"></ol></aside>
+      </div>
+      <div class="toast" id="toast-balanced" role="status"></div>
+    </div>
+  </section>
+
+  <!-- ===================== CALCULATOR ===================== -->
+  <section class="mode" id="mode-calc">
+    <div class="toolbar-panel">
+      <span class="toolbar-label">expression:</span>
+      <input type="text" id="cInput" maxlength="60" value="(((6 + 9)/3)*(6 - 4))" style="width:250px" autocomplete="off" aria-label="Arithmetic expression">
+      <button id="cGo" class="primary">start</button>
+      <select id="cExamples" aria-label="Examples">
+        <option value="">try an example</option>
+        <option value="(((6 + 9)/3)*(6 - 4))">(((6 + 9)/3)*(6 - 4)) &nbsp;= 10</option>
+        <option value="((((12 + 9)/3) + 7.2)*((6 - 4)/8))">((((12 + 9)/3) + 7.2)*((6 - 4)/8))</option>
+        <option value="( ( (60 + 40)/50) * (16 - 4) )">( ( (60 + 40)/50) * (16 - 4) ) &nbsp;= 24</option>
+        <option value="(15/0)">(15/0) &nbsp;division by zero</option>
+      </select>
+      <span class="vsep"></span>
+      <div class="controls" id="cControls"></div>
+    </div>
+    <div class="canvas-panel">
+      <div class="app-grid">
+        <div>
+          <div class="row-label">characters read so far (shaded)</div>
+          <div class="chips" id="cChips"></div>
+          <div class="jars">
+            <div class="jar-col"><div class="jar small" id="cNums"></div><div class="jar-title">numbers</div></div>
+            <div class="jar-col"><div class="jar small" id="cOps"></div><div class="jar-title">operations</div></div>
+          </div>
+          <div class="eval" id="cEval"></div>
+          <div class="banner" id="cBanner"></div>
+          <div class="msg" id="cMsg"></div>
+        </div>
+        <aside class="recipe"><h3>recipe: read_and_evaluate</h3><ol id="cRecipe"></ol></aside>
+      </div>
+      <div class="toast" id="toast-calc" role="status"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/*LOGIC-START*/
+function cleanWord(w) { var s = (w || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10); return s || 'NAT'; }
+
+function buildReverse(word) {
+  var w = cleanWord(word), T = [], stack = [], out = [];
+  T.push({ word: w, stack: [], out: [], read: 0, line: 0, hot: -1,
+    msg: 'Declare a stack of characters. It starts out empty.' });
+  for (var i = 0; i < w.length; i++) {
+    stack = stack.concat(w[i]);
+    T.push({ word: w, stack: stack.slice(), out: out.slice(), read: i + 1, line: 1, hot: i, pushed: true,
+      msg: 'Read "' + w[i] + '" and push it onto the stack.' });
+  }
+  while (stack.length) {
+    var top = stack[stack.length - 1];
+    stack = stack.slice(0, -1); out = out.concat(top);
+    T.push({ word: w, stack: stack.slice(), out: out.slice(), read: w.length, line: 2, hot: -1, popped: top,
+      msg: 'The stack is not empty: write the top character "' + top + '" to the screen, and pop it off.' });
+  }
+  T.push({ word: w, stack: [], out: out.slice(), read: w.length, line: -1, hot: -1, done: true,
+    msg: 'The stack is empty, so we are done! ' + w + ' comes out backward as ' + out.join('') + '.' });
+  return T;
+}
+
+function cleanExpr(e, max) { return Array.from(e || '').filter(function (c) { return !/\s/.test(c); }).slice(0, max).join(''); }
+
+function buildBalanced(expr) {
+  var chars = Array.from(cleanExpr(expr, 36));
+  if (!chars.length) chars = Array.from('(())');
+  var T = [], stack = [], colors = {}, matched = [], failed = false, ci = 0, bad = -1, stopAt = chars.length;
+  function snap(x) {
+    return Object.assign({ chars: chars, stack: stack.map(function (s) { return { idx: s.idx, col: s.col }; }),
+      colors: Object.assign({}, colors), matched: matched.slice(), failed: failed, bad: bad,
+      rule: -1, hot: [-1, -1], msg: '' }, x);
+  }
+  T.push(snap({ msg: 'We start with an empty stack and failed = false.' }));
+  var i = 0;
+  while (i < chars.length && !failed) {
+    var c = chars[i];
+    if (c === '(') {
+      var col = (ci++) % 6;
+      stack.push({ idx: i, col: col }); colors[i] = col;
+      T.push(snap({ rule: 0, hot: [i, i], pushed: true, msg: '"(" is a left parenthesis: push it onto the stack.' }));
+      i++;
+    } else if (c === ')') {
+      if (stack.length) {
+        var it = stack.pop(); colors[i] = it.col; matched.push(it.idx, i);
+        T.push(snap({ rule: 1, hot: [i, i], popped: { col: it.col }, msg: '")" and the stack is not empty: pop the matching "(".' }));
+      } else {
+        failed = true; bad = i; stopAt = i + 1;
+        T.push(snap({ rule: 2, hot: [i, i], stopAt: stopAt, msg: '")" but the stack is empty, so there is no "(" to match. failed = true!' }));
+      }
+      i++;
+    } else {
+      var j = i;
+      while (j + 1 < chars.length && chars[j + 1] !== '(' && chars[j + 1] !== ')') j++;
+      var seg = chars.slice(i, j + 1), many = seg.length > 1;
+      T.push(snap({ rule: 3, hot: [i, j], msg: seg.join(' ') + (many ? ' are' : ' is') + ' not a parenthesis, so we ignore ' + (many ? 'them' : 'it') + '.' }));
+      i = j + 1;
+    }
+  }
+  var ok = stack.length === 0 && !failed, msg;
+  if (failed) msg = 'The loop stopped because failed is true. NOT balanced.';
+  else if (stack.length) msg = 'All the input is read, but ' + stack.length + ' "(" ' + (stack.length > 1 ? 'are' : 'is') + ' still on the stack with no match. NOT balanced.';
+  else msg = 'All the input is read, the stack is empty, and nothing failed. Balanced!';
+  T.push(snap({ rule: 4, done: true, ok: ok, stopAt: stopAt, msg: msg }));
+  return T;
+}
+
+function normExpr(e) { return (e || '').replace(/[\u2013\u2014\u2212]/g, '-').slice(0, 60); }
+
+function tokenize(e) {
+  var s = normExpr(e), t = [], i = 0;
+  while (i < s.length) {
+    var c = s[i];
+    if (/\s/.test(c)) { i++; continue; }
+    if (/[0-9.]/.test(c)) {
+      var j = i; while (j < s.length && /[0-9.]/.test(s[j])) j++;
+      var txt = s.slice(i, j), v = parseFloat(txt);
+      t.push(isNaN(v) ? { type: 'other', text: txt } : { type: 'num', text: txt, val: v });
+      i = j;
+    } else if ('+-*/'.indexOf(c) >= 0) { t.push({ type: 'op', text: c }); i++; }
+    else if (c === '(') { t.push({ type: 'lp', text: c }); i++; }
+    else if (c === ')') { t.push({ type: 'rp', text: c }); i++; }
+    else { t.push({ type: 'other', text: c }); i++; }
+  }
+  return t;
+}
+
+function fmt(n) { return String(parseFloat(n.toFixed(6))); }
+function applyOp(a, op, b) { return op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : a / b; }
+
+function buildCalc(expr) {
+  var toks = tokenize(expr);
+  if (!toks.length) toks = tokenize('(((6 + 9)/3)*(6 - 4))');
+  var T = [], nums = [], ops = [];
+  function snap(x) { return Object.assign({ toks: toks, nums: nums.slice(), ops: ops.slice(), tok: -1, rule: -1, msg: '' }, x); }
+  T.push(snap({ msg: 'Two empty stacks: numbers and operations. We read the expression from left to right.' }));
+  for (var i = 0; i < toks.length; i++) {
+    var k = toks[i];
+    if (k.type === 'num') {
+      nums.push(k.val);
+      T.push(snap({ tok: i, rule: 0, newNum: true, msg: 'Read the number ' + fmt(k.val) + ' and push it onto the numbers stack.' }));
+    } else if (k.type === 'op') {
+      ops.push(k.text);
+      T.push(snap({ tok: i, rule: 1, newOp: true, msg: 'Read "' + k.text + '" and push it onto the operations stack.' }));
+    } else if (k.type === 'rp') {
+      if (nums.length < 2 || ops.length < 1) {
+        T.push(snap({ tok: i, rule: 2, done: true, error: true,
+          msg: 'Oops! An evaluation step needs two numbers and one operation, but the stacks do not have enough. Is the expression fully parenthesized?' }));
+        return T;
+      }
+      var b = nums.pop(), a = nums.pop(), op = ops.pop();
+      if (op === '/' && b === 0) {
+        T.push(snap({ tok: i, rule: 2, done: true, error: true, poppedNums: [b, a], poppedOps: [op],
+          evalText: fmt(a) + ' / 0 = ???', msg: 'Oops! ' + fmt(a) + ' / 0 is a division by zero, so the calculator stops here.' }));
+        return T;
+      }
+      var r = applyOp(a, op, b); nums.push(r);
+      T.push(snap({ tok: i, rule: 2, newNum: true, poppedNums: [b, a], poppedOps: [op],
+        evalText: fmt(a) + ' ' + op + ' ' + fmt(b) + ' = ' + fmt(r), evalNote: true,
+        msg: 'Right parenthesis: time for an evaluation step! Pop two numbers (' + fmt(b) + ', then ' + fmt(a) + ') and the operation "' + op + '". ' +
+          fmt(a) + ' ' + op + ' ' + fmt(b) + ' = ' + fmt(r) + ', so push ' + fmt(r) + ' back onto the numbers stack.' }));
+    } else if (k.type === 'lp') {
+      T.push(snap({ tok: i, rule: 3, msg: 'A left parenthesis is simply read and thrown away. The stacks do not change.' }));
+    } else {
+      T.push(snap({ tok: i, rule: 3, msg: '"' + k.text + '" is not part of the calculation, so it is thrown away.' }));
+    }
+  }
+  if (nums.length === 1 && ops.length === 0) {
+    T.push(snap({ tok: toks.length, rule: 4, done: true, answer: nums[0],
+      msg: 'No more input. Exactly one number is left in the numbers stack, and that is the answer: ' + fmt(nums[0]) + '!' }));
+  } else {
+    T.push(snap({ tok: toks.length, rule: 4, done: true, error: true,
+      msg: 'No more input, but the numbers stack holds ' + nums.length + ' number(s) and operations holds ' + ops.length + ' operation(s) instead of a single answer. The expression is not complete.' }));
+  }
+  return T;
+}
+/*LOGIC-END*/
+
+/* ---------- little helpers ---------- */
+var $ = function (id) { return document.getElementById(id); };
+var PAL = [['#FFD0B5', '#FF8A65', '#B0350B'], ['#BFF0DD', '#4DD0A7', '#0B6E52'], ['#FFE08A', '#F2A900', '#7A4B00'],
+           ['#E4D9F6', '#8B6BB0', '#5C3D80'], ['#CDEBFA', '#4FB0E5', '#1F6E99'], ['#FFD3E1', '#E86A92', '#9B2D58']];
+
+function mkCard(label, pal, cls) {
+  var d = document.createElement('div');
+  d.className = 'card ' + (cls || '');
+  d.textContent = label;
+  d.style.background = pal[0]; d.style.borderColor = pal[1]; d.style.color = pal[2];
+  return d;
+}
+
+function renderJar(jar, items, o) {
+  o = o || {};
+  jar.innerHTML = '';
+  if (!items.length) {
+    var h = document.createElement('div'); h.className = 'jar-empty'; h.textContent = 'empty'; jar.appendChild(h);
+  }
+  items.forEach(function (it, i) {
+    var last = i === items.length - 1;
+    var c = mkCard(it.label, it.pal, '');
+    if (last) {
+      c.classList.add('istop');
+      if (o.newTop) c.classList.add('new');
+      if (o.glowTop) c.classList.add('glow');
+      var t = document.createElement('span'); t.className = 'top-tag'; t.textContent = 'top'; c.appendChild(t);
+    }
+    if (!(last && o.newTop)) c.style.animationDelay = ((i * 0.35) % 2) + 's';
+    jar.appendChild(c);
+  });
+  (o.ghosts || []).forEach(function (g, k) {
+    var c = mkCard(g.label, g.pal, 'ghost');
+    c.style.bottom = (8 + (items.length + k) * 40) + 'px';
+    jar.appendChild(c);
+    setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 900);
+  });
+}
+
+function renderChips(box, chips) {
+  box.innerHTML = '';
+  chips.forEach(function (ch) {
+    var s = document.createElement('span');
+    s.className = 'chip ' + (ch.cls || '');
+    s.textContent = ch.t;
+    if (ch.style) Object.keys(ch.style).forEach(function (k) { s.style[k] = ch.style[k]; });
+    box.appendChild(s);
+  });
+}
+
+function setRecipe(id, items, active) {
+  var ol = $(id);
+  if (!ol.children.length) {
+    items.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ol.appendChild(li); });
+  }
+  Array.prototype.forEach.call(ol.children, function (li, i) { li.classList.toggle('active', i === active); });
+}
+
+var toastTimers = {};
+function toast(key, msg) {
+  var t = $('toast-' + key);
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimers[key]);
+  toastTimers[key] = setTimeout(function () { t.classList.remove('show'); }, 2300);
+}
+
+/* ---------- stepper: prev / play / next / reset ---------- */
+var steppers = {};
+function makeStepper(name, rootId, draw) {
+  var root = $(rootId);
+  root.innerHTML = '<button data-a="prev">&larr; prev</button><button class="primary" data-a="play">&#9654; play</button>' +
+    '<button data-a="next">next &rarr;</button><button data-a="reset">reset</button>' +
+    '<span class="speed">speed <input type="range" min="1" max="3" value="2" aria-label="Speed"></span><span class="count"></span>';
+  var st = { trace: [], pos: 0, timer: null };
+  var playBtn = root.querySelector('[data-a=play]'), prevBtn = root.querySelector('[data-a=prev]'),
+      nextBtn = root.querySelector('[data-a=next]'), count = root.querySelector('.count'),
+      speed = root.querySelector('input');
+  function paint(fwd) {
+    draw(st.trace[st.pos], fwd);
+    count.textContent = 'step ' + st.pos + ' / ' + (st.trace.length - 1);
+    prevBtn.disabled = st.pos === 0;
+    nextBtn.disabled = st.pos >= st.trace.length - 1;
+  }
+  function stop() {
+    clearInterval(st.timer); st.timer = null;
+    playBtn.innerHTML = '&#9654; play';
+  }
+  function go(d) {
+    var np = Math.max(0, Math.min(st.trace.length - 1, st.pos + d));
+    if (np === st.pos) return;
+    st.pos = np; paint(d === 1);
+  }
+  function play() {
+    if (st.timer) { stop(); return; }
+    if (st.pos >= st.trace.length - 1) { st.pos = 0; paint(false); }
+    playBtn.innerHTML = '&#10074;&#10074; pause';
+    var delay = [0, 1900, 1200, 700][+speed.value];
+    st.timer = setInterval(function () {
+      if (st.pos >= st.trace.length - 1) { stop(); return; }
+      go(1);
+      if (st.pos >= st.trace.length - 1) stop();
+    }, delay);
+  }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var a = b.getAttribute('data-a');
+    if (a === 'prev') { stop(); go(-1); }
+    else if (a === 'next') { stop(); go(1); }
+    else if (a === 'reset') { stop(); st.pos = 0; paint(false); }
+    else if (a === 'play') play();
+  });
+  speed.addEventListener('input', function () { if (st.timer) { stop(); play(); } });
+  st.set = function (trace) { stop(); st.trace = trace; st.pos = 0; paint(false); };
+  st.stop = stop;
+  steppers[name] = st;
+  return st;
+}
+
+/* ---------- tabs ---------- */
+$('tabs').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  Object.keys(steppers).forEach(function (k) { steppers[k].stop(); });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.classList.toggle('on', t === b); });
+  Array.prototype.forEach.call(document.querySelectorAll('.mode'), function (m) { m.classList.toggle('on', m.id === 'mode-' + b.getAttribute('data-mode')); });
+});
+
+/* ================= BASICS ================= */
+var B = { items: [], count: 0 };
+var bubbleTimer;
+function bRender(o) {
+  renderJar($('bJar'), B.items.map(function (i) { return { label: i.label, pal: PAL[i.p] }; }), o);
+  $('bSizeVal').textContent = B.items.length;
+}
+function bMsg(t) { $('bMsg').textContent = t; }
+function bAnswer(t) {
+  var a = $('bBubble'); a.textContent = t;
+  a.classList.remove('show'); void a.offsetWidth; a.classList.add('show');
+  clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(function () { a.classList.remove('show'); }, 3200);
+}
+function bPush() {
+  var v = $('bInput').value.trim();
+  if (!v) { toast('basic', 'Type an item to push first, like 7.'); $('bInput').focus(); return; }
+  if (B.items.length >= 10) { toast('basic', 'The jar is full in this playground (10 items). Pop one first.'); return; }
+  B.items.push({ label: v, p: B.count++ % PAL.length });
+  bRender({ newTop: true });
+  bMsg('push(' + v + '): ' + v + ' lands on top of the stack.');
+  $('bInput').value = ''; $('bInput').focus();
+}
+function bPop() {
+  if (!B.items.length) { toast('basic', '\u26A0\uFE0F Oops! The stack is empty. There is nothing to pop.'); return; }
+  var it = B.items.pop();
+  bRender({ ghosts: [{ label: it.label, pal: PAL[it.p] }] });
+  bAnswer('pop() removed ' + it.label);
+  bMsg('pop(): the top item ' + it.label + ' leaves first (last in, first out).');
+}
+function bTop() {
+  if (!B.items.length) { toast('basic', '\u26A0\uFE0F Oops! The stack is empty. There is no top item.'); return; }
+  var v = B.items[B.items.length - 1].label;
+  bRender({ glowTop: true });
+  setTimeout(function () { bRender(); }, 1500);
+  bAnswer('top() = ' + v);
+  bMsg('top(): peek at ' + v + ' without removing it.');
+}
+$('bPush').onclick = bPush;
+$('bPop').onclick = bPop;
+$('bTop').onclick = bTop;
+$('bEmptyQ').onclick = function () { var e = B.items.length === 0; bAnswer('empty() = ' + e); bMsg('empty(): ' + (e ? 'yes, nothing is stored.' : 'no, there are items inside.')); };
+$('bSizeQ').onclick = function () { bAnswer('size() = ' + B.items.length); bMsg('size(): the stack holds ' + B.items.length + ' item(s).'); };
+$('bClear').onclick = function () { B.items = []; bRender(); bMsg('The stack is empty again.'); };
+$('bInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') bPush(); });
+bRender();
+
+/* ================= REVERSE A WORD ================= */
+var REV_RECIPE = ['Declare a stack of characters.',
+  'While there are more characters to read: read a character and push it onto the stack.',
+  'While the stack is not empty: write the top character to the screen, and pop it off the stack.'];
+
+function drawReverse(s, fwd) {
+  renderChips($('rIn'), Array.from(s.word).map(function (ch, i) {
+    return { t: ch, cls: i === s.hot ? 'now' : (i < s.read ? 'done' : '') };
+  }));
+  renderChips($('rOut'), s.out.map(function (ch, i) {
+    return { t: ch, cls: 'out' + (fwd && s.popped && i === s.out.length - 1 ? ' newest' : '') };
+  }));
+  renderJar($('rJar'), s.stack.map(function (ch) { return { label: ch, pal: PAL[0] }; }),
+    { newTop: !!(fwd && s.pushed), ghosts: fwd && s.popped ? [{ label: s.popped, pal: PAL[0] }] : [] });
+  $('rMsg').textContent = s.msg;
+  setRecipe('rRecipe', REV_RECIPE, s.line);
+}
+var revSt = makeStepper('reverse', 'rControls', drawReverse);
+function startReverse() { var w = cleanWord($('rInput').value); $('rInput').value = w; revSt.set(buildReverse(w)); }
+$('rGo').onclick = startReverse;
+$('rInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') startReverse(); });
+
+/* ================= BALANCED PARENTHESES ================= */
+var BAL_RECIPE = ['"(" : push it onto the stack.',
+  '")" and the stack is not empty: pop the matching "(".',
+  '")" and the stack is empty: failed!',
+  'Any other symbol: ignore it.',
+  'At the end: the stack is empty and nothing failed means balanced.'];
+
+function drawBalanced(s, fwd) {
+  var stop = s.stopAt !== undefined ? s.stopAt : s.chars.length;
+  var lastRead = s.done ? stop - 1 : s.hot[1];
+  var matched = {}; s.matched.forEach(function (i) { matched[i] = true; });
+  renderChips($('pChips'), s.chars.map(function (ch, i) {
+    var isP = ch === '(' || ch === ')', cls = '', style = null, col = s.colors[i];
+    if (!isP && i <= lastRead) cls += ' faded';
+    if (isP && col !== undefined) {
+      style = { borderColor: PAL[col][1] };
+      if (matched[i]) { style.background = PAL[col][0]; style.color = PAL[col][2]; }
+    }
+    if (s.hot[0] >= 0 && i >= s.hot[0] && i <= s.hot[1] && !s.done) cls += ' now';
+    if (s.bad === i) { cls += ' bad'; style = null; }
+    if (s.failed && i >= stop) cls += ' unread';
+    return { t: ch, cls: cls, style: style };
+  }));
+  renderJar($('pJar'), s.stack.map(function (it) { return { label: '(', pal: PAL[it.col] }; }),
+    { newTop: !!(fwd && s.pushed), ghosts: fwd && s.popped ? [{ label: '(', pal: PAL[s.popped.col] }] : [] });
+  var f = $('pFailed'); f.textContent = 'failed = ' + s.failed; f.classList.toggle('bad', s.failed);
+  var bn = $('pBanner');
+  if (s.done) { bn.className = 'banner show ' + (s.ok ? 'ok' : 'bad'); bn.textContent = s.ok ? 'Balanced! Every ( found its )' : 'Not balanced'; }
+  else bn.className = 'banner';
+  $('pMsg').textContent = s.msg;
+  setRecipe('pRecipe', BAL_RECIPE, s.rule);
+}
+var balSt = makeStepper('balanced', 'pControls', drawBalanced);
+function startBalanced() { balSt.set(buildBalanced($('pInput').value)); }
+$('pGo').onclick = startBalanced;
+$('pInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') startBalanced(); });
+$('pExamples').onchange = function () { if (this.value) { $('pInput').value = this.value; startBalanced(); this.selectedIndex = 0; } };
+
+/* ================= CALCULATOR ================= */
+var CALC_RECIPE = ['A number: push it onto the numbers stack.',
+  'An operation (+ - * /): push it onto the operations stack.',
+  '")" : an evaluation step. Pop two numbers and one operation, combine them, and push the result back onto numbers.',
+  '"(" or a blank: read it and throw it away.',
+  'End of input: the single number left in numbers is the answer.'];
+
+function drawCalc(s, fwd) {
+  renderChips($('cChips'), s.toks.map(function (k, i) {
+    return { t: k.text, cls: i === s.tok ? 'now' : (i < s.tok ? 'done' : '') };
+  }));
+  var numGhosts = fwd && s.poppedNums ? s.poppedNums.map(function (n) { return { label: fmt(n), pal: PAL[1] }; }) : [];
+  var opGhosts = fwd && s.poppedOps ? s.poppedOps.map(function (o) { return { label: o, pal: PAL[2] }; }) : [];
+  renderJar($('cNums'), s.nums.map(function (n) { return { label: fmt(n), pal: PAL[1] }; }), { newTop: !!(fwd && s.newNum), ghosts: numGhosts });
+  renderJar($('cOps'), s.ops.map(function (o) { return { label: o, pal: PAL[2] }; }), { newTop: !!(fwd && s.newOp), ghosts: opGhosts });
+  var ev = $('cEval');
+  if (s.evalText) {
+    ev.innerHTML = '';
+    ev.appendChild(document.createTextNode(s.evalText));
+    if (s.evalNote) { var sm = document.createElement('small'); sm.textContent = 'the second number popped is the left operand'; ev.appendChild(sm); }
+    ev.classList.remove('show'); void ev.offsetWidth; ev.classList.add('show');
+  } else ev.classList.remove('show');
+  var bn = $('cBanner');
+  if (s.done) {
+    bn.className = 'banner show ' + (s.error ? 'bad' : 'ok');
+    bn.textContent = s.error ? 'The calculator could not finish' : 'Answer: ' + fmt(s.answer);
+  } else bn.className = 'banner';
+  $('cMsg').textContent = s.msg;
+  setRecipe('cRecipe', CALC_RECIPE, s.rule);
+}
+var calcSt = makeStepper('calc', 'cControls', drawCalc);
+function startCalc() { calcSt.set(buildCalc($('cInput').value)); }
+$('cGo').onclick = startCalc;
+$('cInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') startCalc(); });
+$('cExamples').onchange = function () { if (this.value) { $('cInput').value = this.value; startCalc(); this.selectedIndex = 0; } };
+
+/* first draw for every mode so tabs are ready */
+startReverse(); startBalanced(); startCalc();
+
+/* tiny hook so the logic can be tested outside the browser */
+window.__stackLogic = { buildReverse: buildReverse, buildBalanced: buildBalanced, buildCalc: buildCalc, fmt: fmt };
+})();
+</script>
+</body>
+</html>
