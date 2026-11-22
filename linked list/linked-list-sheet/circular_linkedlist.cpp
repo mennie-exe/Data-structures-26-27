@@ -31,11 +31,16 @@ void insertAfter(int val, int pos, node *&head)
     }
     else
     {
-        while (prev->data != pos)
+        while (prev->data != pos && prev->next != head)
         {
             prev = prev->next;
         }
-
+        if (prev->data != pos)
+        {
+            delete newnode;
+            return;
+        }
+        
         newnode->next = prev->next;
         prev->next = newnode;
         return;

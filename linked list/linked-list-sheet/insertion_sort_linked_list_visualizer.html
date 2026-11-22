@@ -1,0 +1,407 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linked List Insertion Sort</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 45px 20px;
+    font-family: Arial, sans-serif;
+    background: #fff;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+}
+
+.list-section {
+    width: 100%;
+    max-width: 900px;
+}
+
+.list-label {
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: 35px;
+}
+
+.list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 90px;
+}
+
+.node {
+    width: 65px;
+    height: 58px;
+    border: 2px solid #333;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 23px;
+    background: white;
+    flex-shrink: 0;
+}
+
+.node.current {
+    border: 3px solid #e08a24;
+    background: #fff5e8;
+}
+
+.node.temp {
+    border: 3px solid #2677c9;
+    background: #edf6ff;
+}
+
+.node.next {
+    border: 3px solid #26965b;
+    background: #edfff4;
+}
+
+.pointer {
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.current .pointer { color: #c46a00; }
+.temp .pointer { color: #1769aa; }
+.next .pointer { color: #168044; }
+
+.link {
+    font-size: 25px;
+    flex-shrink: 0;
+}
+
+.null {
+    font-size: 16px;
+    margin-left: 2px;
+    flex-shrink: 0;
+}
+
+.explanation {
+    width: 100%;
+    max-width: 700px;
+    min-height: 55px;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 14px;
+}
+
+.legend span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+button {
+    width: 55px;
+    height: 45px;
+    font-size: 25px;
+    background: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: .3;
+    cursor: default;
+}
+
+#stepNumber {
+    font-size: 14px;
+    min-width: 65px;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="list-section">
+    <div class="list-label">Sorted List</div>
+    <div class="list" id="sorted"></div>
+</div>
+
+<div class="list-section">
+    <div class="list-label">Unprocessed List</div>
+    <div class="list" id="remaining"></div>
+</div>
+
+<div class="legend">
+    <span><i class="dot" style="background:#e08a24"></i> current</span>
+    <span><i class="dot" style="background:#2677c9"></i> temp</span>
+    <span><i class="dot" style="background:#26965b"></i> nextNode</span>
+</div>
+
+<div class="explanation" id="explanation"></div>
+
+<div class="controls">
+    <button id="prev" aria-label="Previous step">←</button>
+    <span id="stepNumber"></span>
+    <button id="next" aria-label="Next step">→</button>
+</div>
+
+<script>
+const values = [5, 2, 4, 1, 3];
+
+let sorted = [];
+let remaining = [...values];
+let steps = [];
+
+function saveStep(message, pointers = {}) {
+    steps.push({
+        sorted: [...sorted],
+        remaining: [...remaining],
+        pointers: { ...pointers },
+        message
+    });
+}
+
+// Initial state
+saveStep("Start: sorted = NULL, current = head.");
+
+// Simulate the linked-list insertion sort algorithm
+while (remaining.length > 0) {
+
+    // current points to the first unprocessed node
+    let current = remaining[0];
+
+    // Save the next node before changing current->next
+    let nextNode = remaining.length > 1
+        ? remaining[1]
+        : null;
+
+    saveStep(
+        `current points to ${current}. Save nextNode = ${
+            nextNode === null ? "NULL" : nextNode
+        } before changing any links.`,
+        { current, nextNode }
+    );
+
+    // Check whether sorted is empty or current belongs at the beginning
+    if (sorted.length === 0 || current < sorted[0]) {
+
+        saveStep(
+            `Check: sorted is ${
+                sorted.length === 0 ? "NULL" : sorted[0]
+            }. Insert ${current} at the beginning.`,
+            { current, nextNode }
+        );
+
+        sorted.unshift(current);
+        remaining.shift();
+
+        saveStep(
+            `Set current->next = old sorted head, then sorted = current (${current}).`,
+            { nextNode }
+        );
+
+    } else {
+
+        // Start temp at the sorted-list head
+        let tempIndex = 0;
+        let temp = sorted[tempIndex];
+
+        saveStep(
+            `current (${current}) is not smaller than the sorted head. Set temp = ${temp}.`,
+            { current, nextNode, temp }
+        );
+
+        // Move temp while the next node is <= current
+        while (
+            tempIndex + 1 < sorted.length &&
+            sorted[tempIndex + 1] <= current
+        ) {
+
+            let nextSorted = sorted[tempIndex + 1];
+
+            saveStep(
+                `Compare temp->next (${nextSorted}) with current (${current}). Move temp forward.`,
+                { current, nextNode, temp }
+            );
+
+            tempIndex++;
+            temp = sorted[tempIndex];
+
+            saveStep(
+                `temp now points to ${temp}.`,
+                { current, nextNode, temp }
+            );
+        }
+
+        saveStep(
+            `Stop searching. Insert ${current} after temp (${temp}).`,
+            { current, nextNode, temp }
+        );
+
+        // Insert current after temp
+        sorted.splice(tempIndex + 1, 0, current);
+        remaining.shift();
+
+        saveStep(
+            `Set current->next = temp->next, then temp->next = current (${current}).`,
+            { nextNode, temp }
+        );
+    }
+
+    // Move current to the saved nextNode
+    saveStep(
+        `Move current to the saved nextNode (${
+            nextNode === null ? "NULL" : nextNode
+        }).`,
+        {}
+    );
+}
+
+saveStep("Sorting completed! The linked list is now sorted.");
+
+// Drawing
+function drawList(container, items, pointers, listType) {
+    container.innerHTML = "";
+
+    if (items.length === 0) {
+        const nullLabel = document.createElement("span");
+        nullLabel.className = "null";
+        nullLabel.textContent = "NULL";
+        container.appendChild(nullLabel);
+        return;
+    }
+
+    items.forEach((value, index) => {
+        const node = document.createElement("div");
+        node.className = "node";
+
+        let pointerNames = [];
+
+        if (listType === "remaining") {
+            if (pointers.current === value) {
+                node.classList.add("current");
+                pointerNames.push("current");
+            }
+
+            if (pointers.nextNode === value) {
+                node.classList.add("next");
+                pointerNames.push("nextNode");
+            }
+        }
+
+        if (listType === "sorted" && pointers.temp === value) {
+            node.classList.add("temp");
+            pointerNames.push("temp");
+        }
+
+        node.textContent = value;
+
+        if (pointerNames.length > 0) {
+            const label = document.createElement("span");
+            label.className = "pointer";
+            label.textContent = pointerNames.join(" / ");
+            node.appendChild(label);
+        }
+
+        container.appendChild(node);
+
+        const arrow = document.createElement("span");
+        arrow.className = "link";
+        arrow.textContent = "→";
+        container.appendChild(arrow);
+    });
+
+    const nullLabel = document.createElement("span");
+    nullLabel.className = "null";
+    nullLabel.textContent = "NULL";
+    container.appendChild(nullLabel);
+}
+
+let currentStep = 0;
+
+function render() {
+    const state = steps[currentStep];
+
+    drawList(
+        document.getElementById("sorted"),
+        state.sorted,
+        state.pointers,
+        "sorted"
+    );
+
+    drawList(
+        document.getElementById("remaining"),
+        state.remaining,
+        state.pointers,
+        "remaining"
+    );
+
+    document.getElementById("explanation").textContent =
+        state.message;
+
+    document.getElementById("stepNumber").textContent =
+        `${currentStep + 1} / ${steps.length}`;
+
+    document.getElementById("prev").disabled =
+        currentStep === 0;
+
+    document.getElementById("next").disabled =
+        currentStep === steps.length - 1;
+}
+
+document.getElementById("prev").onclick = () => {
+    if (currentStep > 0) {
+        currentStep--;
+        render();
+    }
+};
+
+document.getElementById("next").onclick = () => {
+    if (currentStep < steps.length - 1) {
+        currentStep++;
+        render();
+    }
+};
+
+render();
+</script>
+
+</body>
+</html>
